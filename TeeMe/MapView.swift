@@ -52,6 +52,19 @@ struct MapView: View {
                 Marker(item: result)
             }
             .annotationTitles(.hidden)
+            
+            // Add the route overlay when available
+            if let route {
+                MapPolyline(route.polyline)
+                    .stroke(
+                        .green,
+                        style: StrokeStyle(
+                            lineWidth: 5,
+                            lineCap: .round,
+                            lineJoin: .round
+                        )
+                    )
+            }
         }
         .mapControls {
             MapUserLocationButton()
