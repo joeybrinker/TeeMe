@@ -7,5 +7,12 @@ Right now, TeeMe shows you golf courses by using user location and also shows a 
 ## What I learned
 So far I have learned a lot on how to use MapKit and user location principles. I continue to regularly work on this project so be on the lookout for updates and further development changes.
 
+## How to use
+- Click the "Code" button in the top right corner
+- Download ZIP
+- Extract ZIP
+- Click on Euchre.xcodeproj
+- Once Xcode opens, run the project by clicking the play button which looks like an arrow in the top left
+
 ## Feedback
 If you have any feedback, please reach out to me at brinkerjoey@outlook.com
