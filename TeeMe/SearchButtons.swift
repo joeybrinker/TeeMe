@@ -23,7 +23,7 @@ struct SearchButtons: View {
         HStack(spacing: 12) {
             // Search for golf courses
             Button {
-                search(for: "public golf course")
+                search(for: "golf course")
             } label: {
                 Label("Golf Course", systemImage: "figure.golf")
                     .padding(.horizontal, 4)
