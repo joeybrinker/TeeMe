@@ -11,6 +11,7 @@ struct LogInView: View {
     @State private var signIn = false
     
     var body: some View {
+        
         NavigationStack{
             ZStack{
                 Color.green
@@ -18,35 +19,40 @@ struct LogInView: View {
                 VStack{
                     Spacer()
                     VStack(alignment: .leading){
-                            Text("TeeMe")
-                                .fontWeight(.heavy)
-                                .font(.system(size: 36))
+                        Text("TeeMe")
+                            .font(.largeTitle.weight(.heavy))
                         Text("The best place to find courses near you.\nFor golfers, by golfers.")
+                            .font(.body)
                     }
                     .foregroundStyle(Color.white)
                     .padding()
-                    VStack{
+                    VStack(){
                         NavigationLink(destination: SignInView()){
-                            Text("Sign In")
-                                .frame(width: 290, height: 55)
-                                .background(Color.white)
-                                .foregroundStyle(Color.green)
-                                .clipShape(.buttonBorder)
+                            ZStack{
+                                RoundedRectangle(cornerRadius: 12)
+                                    .frame(width: 290, height: 55)
+                                    .foregroundStyle(.white)
+                                Text("Sign In")
+                                    .foregroundStyle(Color.green)
+                            }
                         }
                         
                         NavigationLink(destination: SignUpView()){
                             Text("Sign Up")
                                 .frame(width: 290, height: 55)
                                 .foregroundStyle(Color.white)
-                                .border(.white, width: 2)
-                                .clipShape(.buttonBorder)
-                              
+                                .overlay{
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(.white, lineWidth: 2)
+                                }
                         }
-                        .padding()
                     }
                 }
+                .frame(width: 350)
+                .padding(.vertical)
             }
         }
+        .tint(Color.white)
     }
 }
 
