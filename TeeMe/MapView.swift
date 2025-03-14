@@ -73,7 +73,7 @@ struct MapView: View {
         .onAppear {
             locationManager.requestWhenInUseAuthorization()
         }
-        .mapStyle(.standard(elevation: .realistic))
+        .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
         .safeAreaInset(edge: .bottom) {
             bottomOverlay
         }
