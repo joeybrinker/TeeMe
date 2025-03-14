@@ -12,7 +12,7 @@ So far I have learned a lot on how to use MapKit and user location principles. I
 - Click the "Code" button in the top right corner
 - Download ZIP
 - Extract ZIP
-- Click on Euchre.xcodeproj
+- Click on TeeMe.xcodeproj
 - Once Xcode opens, run the project by clicking the play button which looks like an arrow in the top left
 
 ## Feedback
