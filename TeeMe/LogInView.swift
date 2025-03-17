@@ -11,7 +11,6 @@ struct LogInView: View {
     @State private var signIn = false
     
     var body: some View {
-        
         NavigationStack{
             ZStack{
                 Color.green
