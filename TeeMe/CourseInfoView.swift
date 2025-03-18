@@ -18,6 +18,10 @@ struct CourseInfoView: View {
     var selectedMapItem: MKMapItem?
     var route: MKRoute?
     
+    // Favorite Courses
+    @State private var isFavorite: Bool = false
+    @State private var favoriteCourses: [MKMapItem] = []
+    
     // MARK: - Computed Properties
     
     // Formatted travel time for the route
@@ -50,48 +54,81 @@ struct CourseInfoView: View {
     
     // Information overlay showing name and travel time
     private var overlayContent: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            // Location name
-            if let name = selectedMapItem?.name {
-                Text(name)
-                    .font(.headline)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(6)
+        HStack{
+            VStack(alignment: .leading, spacing: 4) {
+                // Location name
+                if let name = selectedMapItem?.name {
+                    Text(name)
+                        .font(.headline)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(6)
+                }
+                if let phoneNumber = selectedMapItem?.phoneNumber {
+                    Text(phoneNumber)
+                        .font(.headline)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(6)
+                }
+                if let address = selectedMapItem?.placemark.postalAddress {
+                    let completeAddress = "\(address.street), \(address.city), \(address.state)"
+                    Text(completeAddress)
+                        .font(.headline)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(6)
+                }
+                
+                // Travel time if available
+                if let time = travelTime {
+                    Text("Travel time: \(time)")
+                        .font(.subheadline)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(6)
+                }
             }
-            if let phoneNumber = selectedMapItem?.phoneNumber {
-                Text(phoneNumber)
-                    .font(.headline)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(6)
+            .padding(12)
+            
+            Button{
+                isFavorite.toggle()
+                if let selectedCourse = selectedMapItem{
+                    if isFavorite {
+                        if !favoriteCourses.contains(selectedCourse){
+                            favoriteCourses.append(selectedCourse)
+                            printFavoriteCourses() // 
+                        }
+                    }
+                    else{
+                        if favoriteCourses.contains(selectedCourse){
+                            favoriteCourses.remove(at: favoriteCourses.firstIndex(of: selectedCourse)!)
+                            printFavoriteCourses() //
+                        }
+                    }
+                }
+            }label:{
+                if isFavorite{
+                    Image(systemName: "star.fill")
+                }
+                else{
+                    Image(systemName: "star")
+                }
             }
-            if let address = selectedMapItem?.placemark.postalAddress {
-                let completeAddress = "\(address.street), \(address.city), \(address.state)"
-                Text(completeAddress)
-                    .font(.headline)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(6)
-            }
-
-            // Travel time if available
-            if let time = travelTime {
-                Text("Travel time: \(time)")
-                    .font(.subheadline)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(6)
-            }
+            .font(.title3)
         }
-        .padding(12)
     }
     
     // MARK: - Helper Methods
+    
+    func printFavoriteCourses() {
+        print("Favorite Courses:")
+        favoriteCourses.forEach { print($0.placemark.title ?? "Unknown Title") }
+    }
     
 //    // Load the Look Around scene for the selected location
 //    func getLookAroundScene() {
