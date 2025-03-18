@@ -33,25 +33,26 @@ struct CourseInfoView: View {
     // MARK: - View Body
     var body: some View {
         // Display Look Around preview for the location
-        LookAroundPreview(initialScene: lookAroundScene)
-            .overlay(alignment: .bottomTrailing) {
-                overlayContent
-            }
-            .onAppear {
-                getLookAroundScene()
-            }
-            .onChange(of: selectedMapItem) { _, _ in
-                getLookAroundScene()
-            }
+//        LookAroundPreview(initialScene: lookAroundScene)
+//            .overlay(alignment: .bottomTrailing) {
+//                overlayContent
+//            }
+//            .onAppear {
+//                getLookAroundScene()
+//            }
+//            .onChange(of: selectedMapItem) { _, _ in
+//                getLookAroundScene()
+//            }
+        overlayContent
     }
     
     // MARK: - UI Components
     
     // Information overlay showing name and travel time
     private var overlayContent: some View {
-        VStack(alignment: .trailing, spacing: 4) {
+        VStack(alignment: .leading, spacing: 4) {
             // Location name
-            if let name = selectedMapItem?.placemark.name {
+            if let name = selectedMapItem?.name {
                 Text(name)
                     .font(.headline)
                     .padding(.horizontal, 8)
@@ -59,7 +60,24 @@ struct CourseInfoView: View {
                     .background(.ultraThinMaterial)
                     .cornerRadius(6)
             }
-            
+            if let phoneNumber = selectedMapItem?.phoneNumber {
+                Text(phoneNumber)
+                    .font(.headline)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(6)
+            }
+            if let address = selectedMapItem?.placemark.postalAddress {
+                let completeAddress = "\(address.street), \(address.city), \(address.state)"
+                Text(completeAddress)
+                    .font(.headline)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(6)
+            }
+
             // Travel time if available
             if let time = travelTime {
                 Text("Travel time: \(time)")
@@ -75,20 +93,20 @@ struct CourseInfoView: View {
     
     // MARK: - Helper Methods
     
-    // Load the Look Around scene for the selected location
-    func getLookAroundScene() {
-        // Reset any existing scene
-        lookAroundScene = nil
-        
-        // Safely unwrap the selectedMapItem
-        guard let mapItem = selectedMapItem else { return }
-        
-        // Fetch the scene asynchronously
-        Task {
-            let request = MKLookAroundSceneRequest(mapItem: mapItem)
-            lookAroundScene = try? await request.scene
-        }
-    }
+//    // Load the Look Around scene for the selected location
+//    func getLookAroundScene() {
+//        // Reset any existing scene
+//        lookAroundScene = nil
+//        
+//        // Safely unwrap the selectedMapItem
+//        guard let mapItem = selectedMapItem else { return }
+//        
+//        // Fetch the scene asynchronously
+//        Task {
+//            let request = MKLookAroundSceneRequest(mapItem: mapItem)
+//            lookAroundScene = try? await request.scene
+//        }
+//    }
 }
 
 #Preview {
