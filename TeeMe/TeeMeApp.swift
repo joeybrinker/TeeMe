@@ -20,9 +20,13 @@ struct TeeMeApp: App {
     // Register app delegate for Firebase setup
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
+    // Create shared course data model
+    @StateObject private var courseModel = CourseDataModel()
+    
     var body: some Scene {
         WindowGroup {
-            MapView()
+            ContentView()
+                .environmentObject(courseModel)
         }
     }
 }

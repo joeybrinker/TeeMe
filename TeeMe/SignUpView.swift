@@ -16,7 +16,7 @@ struct SignUpView: View {
     
     var body: some View {
         if isSignedIn {
-            MapView()
+            ContentView()
         } else {
             signUpContent
         }
@@ -111,7 +111,7 @@ struct SignUpView: View {
                 Text(errorMessage)
                     .foregroundStyle(.white)
                     .offset(y: 20)
-                    .frame(width: 350)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
     }

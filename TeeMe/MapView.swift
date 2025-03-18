@@ -15,6 +15,8 @@ extension CLLocationCoordinate2D {
 
 struct MapView: View {
     // MARK: - State Properties
+    @EnvironmentObject var courseModel: CourseDataModel
+    
     @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
     @State private var visibleRegion: MKCoordinateRegion?
     @State private var searchResults: [MKMapItem] = []
@@ -140,4 +142,5 @@ struct MapView: View {
 
 #Preview {
     MapView()
+        .environmentObject(CourseDataModel())
 }

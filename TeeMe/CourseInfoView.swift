@@ -11,6 +11,9 @@ import MapKit
 struct CourseInfoView: View {
     // MARK: - Properties
     
+    // Add this line to use the shared model
+    @EnvironmentObject var courseModel: CourseDataModel
+    
     // Look Around scene for the selected location
     @State private var lookAroundScene: MKLookAroundScene?
     
@@ -18,9 +21,8 @@ struct CourseInfoView: View {
     var selectedMapItem: MKMapItem?
     var route: MKRoute?
     
-    // Favorite Courses
+    // Favorite state
     @State private var isFavorite: Bool = false
-    @State private var favoriteCourses: [MKMapItem] = []
     
     // MARK: - Computed Properties
     
@@ -38,6 +40,12 @@ struct CourseInfoView: View {
     var body: some View {
         // Main content view
         overlayContent
+            .onAppear {
+                // Set initial favorite state when view appears
+                if let course = selectedMapItem {
+                    isFavorite = courseModel.isFavorite(course: course)
+                }
+            }
     }
     
     // MARK: - UI Components
@@ -89,21 +97,10 @@ struct CourseInfoView: View {
             }
             .padding(12)
             
-            // Favorite button
+            // Favorite button - updated to use the course model
             Button {
-                isFavorite.toggle()
                 if let selectedCourse = selectedMapItem {
-                    if isFavorite {
-                        if !favoriteCourses.contains(selectedCourse) {
-                            favoriteCourses.append(selectedCourse)
-                            printFavoriteCourses()
-                        }
-                    } else {
-                        if favoriteCourses.contains(selectedCourse) {
-                            favoriteCourses.remove(at: favoriteCourses.firstIndex(of: selectedCourse)!)
-                            printFavoriteCourses()
-                        }
-                    }
+                    isFavorite = courseModel.toggleFavorite(for: selectedCourse)
                 }
             } label: {
                 Image(systemName: isFavorite ? "star.fill" : "star")
@@ -111,15 +108,9 @@ struct CourseInfoView: View {
             .font(.title3)
         }
     }
-    
-    // MARK: - Helper Methods
-    
-    func printFavoriteCourses() {
-        print("Favorite Courses:")
-        favoriteCourses.forEach { print($0.placemark.title ?? "Unknown Title") }
-    }
 }
 
 #Preview {
     CourseInfoView()
+        .environmentObject(CourseDataModel())
 }

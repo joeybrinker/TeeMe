@@ -50,7 +50,7 @@ struct LogInView: View {
                         }
                     }
                 }
-                .frame(width: 350)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(.vertical)
             }
         }
