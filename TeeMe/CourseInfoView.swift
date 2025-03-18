@@ -36,17 +36,7 @@ struct CourseInfoView: View {
     
     // MARK: - View Body
     var body: some View {
-        // Display Look Around preview for the location
-//        LookAroundPreview(initialScene: lookAroundScene)
-//            .overlay(alignment: .bottomTrailing) {
-//                overlayContent
-//            }
-//            .onAppear {
-//                getLookAroundScene()
-//            }
-//            .onChange(of: selectedMapItem) { _, _ in
-//                getLookAroundScene()
-//            }
+        // Main content view
         overlayContent
     }
     
@@ -54,7 +44,7 @@ struct CourseInfoView: View {
     
     // Information overlay showing name and travel time
     private var overlayContent: some View {
-        HStack{
+        HStack {
             VStack(alignment: .leading, spacing: 4) {
                 // Location name
                 if let name = selectedMapItem?.name {
@@ -65,6 +55,8 @@ struct CourseInfoView: View {
                         .background(.ultraThinMaterial)
                         .cornerRadius(6)
                 }
+                
+                // Phone number if available
                 if let phoneNumber = selectedMapItem?.phoneNumber {
                     Text(phoneNumber)
                         .font(.headline)
@@ -73,6 +65,8 @@ struct CourseInfoView: View {
                         .background(.ultraThinMaterial)
                         .cornerRadius(6)
                 }
+                
+                // Address if available
                 if let address = selectedMapItem?.placemark.postalAddress {
                     let completeAddress = "\(address.street), \(address.city), \(address.state)"
                     Text(completeAddress)
@@ -95,29 +89,24 @@ struct CourseInfoView: View {
             }
             .padding(12)
             
-            Button{
+            // Favorite button
+            Button {
                 isFavorite.toggle()
-                if let selectedCourse = selectedMapItem{
+                if let selectedCourse = selectedMapItem {
                     if isFavorite {
-                        if !favoriteCourses.contains(selectedCourse){
+                        if !favoriteCourses.contains(selectedCourse) {
                             favoriteCourses.append(selectedCourse)
-                            printFavoriteCourses() // 
+                            printFavoriteCourses()
                         }
-                    }
-                    else{
-                        if favoriteCourses.contains(selectedCourse){
+                    } else {
+                        if favoriteCourses.contains(selectedCourse) {
                             favoriteCourses.remove(at: favoriteCourses.firstIndex(of: selectedCourse)!)
-                            printFavoriteCourses() //
+                            printFavoriteCourses()
                         }
                     }
                 }
-            }label:{
-                if isFavorite{
-                    Image(systemName: "star.fill")
-                }
-                else{
-                    Image(systemName: "star")
-                }
+            } label: {
+                Image(systemName: isFavorite ? "star.fill" : "star")
             }
             .font(.title3)
         }
@@ -129,21 +118,6 @@ struct CourseInfoView: View {
         print("Favorite Courses:")
         favoriteCourses.forEach { print($0.placemark.title ?? "Unknown Title") }
     }
-    
-//    // Load the Look Around scene for the selected location
-//    func getLookAroundScene() {
-//        // Reset any existing scene
-//        lookAroundScene = nil
-//        
-//        // Safely unwrap the selectedMapItem
-//        guard let mapItem = selectedMapItem else { return }
-//        
-//        // Fetch the scene asynchronously
-//        Task {
-//            let request = MKLookAroundSceneRequest(mapItem: mapItem)
-//            lookAroundScene = try? await request.scene
-//        }
-//    }
 }
 
 #Preview {
