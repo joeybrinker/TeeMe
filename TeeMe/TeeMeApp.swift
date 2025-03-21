@@ -25,7 +25,7 @@ struct TeeMeApp: App {
     
     var body: some Scene {
         WindowGroup {
-            LogInView()
+            ContentView()
                 .environmentObject(courseModel)
         }
     }
