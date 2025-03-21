@@ -13,6 +13,7 @@ struct ContentView: View {
     @EnvironmentObject var courseModel: CourseDataModel
     
     var body: some View {
+            
         if Auth.auth().currentUser != nil {
             TabView(selection: $selectedTab) {
                 MapView()

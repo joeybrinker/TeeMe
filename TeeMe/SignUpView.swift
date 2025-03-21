@@ -17,6 +17,7 @@ struct SignUpView: View {
     var body: some View {
         if isSignedIn {
             ContentView()
+                .toolbarVisibility(.hidden)
         } else {
             signUpContent
         }
@@ -114,6 +115,7 @@ struct SignUpView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
+        .navigationBarBackButtonHidden()
     }
     
     // Sign up function
@@ -128,6 +130,7 @@ struct SignUpView: View {
 
 #Preview {
     SignUpView()
+        .environmentObject(CourseDataModel())
 }
 
 extension View {

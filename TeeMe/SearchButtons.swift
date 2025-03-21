@@ -25,7 +25,7 @@ struct SearchButtons: View {
             Button {
                 search(for: "golf course")
             } label: {
-                Label("Golf Course", systemImage: "figure.golf")
+                Label("Search", systemImage: "figure.golf")
                     .padding(.horizontal, 4)
             }
             .buttonStyle(.bordered)

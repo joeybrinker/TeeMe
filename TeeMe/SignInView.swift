@@ -17,6 +17,7 @@ struct SignInView: View {
     var body: some View {
         if isSignedIn {
             ContentView()
+                .toolbarVisibility(.hidden)
         } else {
             signInContent
         }
@@ -128,4 +129,5 @@ struct SignInView: View {
 
 #Preview {
     SignInView()
+        .environmentObject(CourseDataModel())
 }

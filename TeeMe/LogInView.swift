@@ -54,10 +54,10 @@ struct LogInView: View {
                 .padding(.vertical)
             }
         }
-        .tint(Color.white)
     }
 }
 
 #Preview {
     LogInView()
+        .environmentObject(CourseDataModel())
 }

@@ -78,7 +78,7 @@ struct FavoritesView: View {
 }
 
 // Helper extension to make MKMapItem identifiable for sheet presentation
-extension MKMapItem: Identifiable {
+extension MKMapItem: @retroactive Identifiable {
     public var id: String {
         return self.placemark.title ?? UUID().uuidString
     }

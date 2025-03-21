@@ -22,7 +22,7 @@ struct CourseInfoView: View {
     var route: MKRoute?
     
     // Favorite state
-    @State private var isFavorite: Bool = false
+    @State private var isFavorited: Bool = false
     
     // MARK: - Computed Properties
     
@@ -43,7 +43,7 @@ struct CourseInfoView: View {
             .onAppear {
                 // Set initial favorite state when view appears
                 if let course = selectedMapItem {
-                    isFavorite = courseModel.isFavorite(course: course)
+                    isFavorited = courseModel.isFavorite(course: course)
                 }
             }
     }
@@ -100,10 +100,10 @@ struct CourseInfoView: View {
             // Favorite button - updated to use the course model
             Button {
                 if let selectedCourse = selectedMapItem {
-                    isFavorite = courseModel.toggleFavorite(for: selectedCourse)
+                    isFavorited = courseModel.toggleFavorite(for: selectedCourse)
                 }
             } label: {
-                Image(systemName: isFavorite ? "star.fill" : "star")
+                Image(systemName: courseModel.isFavorite(course: selectedMapItem!) ? "star.fill" : "star")
             }
             .font(.title3)
         }
