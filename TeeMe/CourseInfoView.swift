@@ -104,6 +104,7 @@ struct CourseInfoView: View {
                 }
             } label: {
                 Image(systemName: courseModel.isFavorite(course: selectedMapItem!) ? "star.fill" : "star")
+                    .foregroundStyle(.green)
             }
             .font(.title3)
         }
