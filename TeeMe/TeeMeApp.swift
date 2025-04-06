@@ -25,9 +25,9 @@ struct TeeMeApp: App {
     
     var body: some Scene {
         WindowGroup {
-            CloudKitTeeMe()
-//            ContentView()
-//                .environmentObject(courseModel)
+            //CloudKitTeeMe()
+            ContentView()
+                .environmentObject(courseModel)
         }
     }
 }

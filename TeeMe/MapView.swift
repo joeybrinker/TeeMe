@@ -39,6 +39,9 @@ struct MapView: View {
             .onChange(of: selectedMapItem) { _, _ in
                 getDirections()
             }
+            .onAppear{
+                SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "golf course")
+            }
     }
     
     // MARK: - UI Components
@@ -85,26 +88,40 @@ struct MapView: View {
     private var bottomOverlay: some View {
         HStack {
             Spacer()
-            VStack(spacing: 0) {
+            VStack(spacing: 10) {
                 // Selected location info if available
                 if let selectedMapItem {
-                    CourseInfoView(selectedMapItem: selectedMapItem, route: route)
-                        .frame(height: 128)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .padding([.top, .horizontal])
+                    ZStack{
+                        RoundedRectangle(cornerRadius: 10)
+                            .frame(height: 160)
+                            .foregroundStyle(.ultraThinMaterial)
+                        
+                        CourseInfoView(selectedMapItem: selectedMapItem, route: route)
+                            .frame(height: 128)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .padding()
+                    }
+                        
                 }
                 
-                // Search buttons
-                SearchButtons(
-                    position: $position,
-                    searchResults: $searchResults,
-                    visibleRegion: visibleRegion
-                )
-                .padding(.top)
+                Button {
+                    SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "golf course")
+                } label: {
+                    ZStack{
+                        RoundedRectangle(cornerRadius: 35)
+                            .frame(width: 128, height: 48)
+                            .foregroundColor(.green)
+                        Text("Search")
+                            .font(.headline.weight(.semibold))
+                            .foregroundColor(.white)
+                    }
+                    .shadow(radius: 10)
+                }
             }
             Spacer()
         }
-        .background(.thinMaterial)
+        .padding()
+        //.background(.thinMaterial)
     }
     
     // MARK: - Helper Methods
