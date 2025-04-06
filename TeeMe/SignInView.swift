@@ -9,38 +9,40 @@ import SwiftUI
 import FirebaseAuth
 
 struct SignInView: View {
-    @State private var name = ""
     @State private var email = ""
     @State private var password = ""
     @State private var errorMessage = ""
-    @State var isSignedIn = false
+    @State private var isSignedIn = false
+    
     var body: some View {
-        
         if isSignedIn {
-            MapView()
+            ContentView()
+                .toolbarVisibility(.hidden)
+        } else {
+            signInContent
         }
-        else{
-            SignInContent
-        }
-        
     }
     
-    var SignInContent: some View {
-        NavigationStack{
-            ZStack{
+    private var signInContent: some View {
+        NavigationStack {
+            ZStack {
                 Color.green
-                VStack{
+                    .ignoresSafeArea()
+                
+                VStack {
                     Spacer()
+                    
                     Text("Sign In")
                         .font(.largeTitle.weight(.heavy))
                         .foregroundStyle(.white)
+                    
                     Spacer()
-                    VStack(spacing: 20){
-                        HStack{
-                            //Image(systemName: "envelope.fill")
+                    
+                    VStack(spacing: 20) {
+                        HStack {
                             TextField("", text: $email)
                                 .textFieldStyle(.plain)
-                                .placeholder(when: email.isEmpty){ //this is the placeholder
+                                .placeholder(when: email.isEmpty) {
                                     Text("Email")
                                         .font(.headline)
                                         .bold()
@@ -49,17 +51,15 @@ struct SignInView: View {
                         Rectangle()
                             .frame(width: 350, height: 1)
                         
-                        HStack{
-                            //Image(systemName: "lock.fill")
-                            SecureField ("", text: $password)
+                        HStack {
+                            SecureField("", text: $password)
                                 .textFieldStyle(.plain)
-                                .placeholder(when: password.isEmpty){
+                                .placeholder(when: password.isEmpty) {
                                     Text("Password")
                                         .font(.headline)
                                         .bold()
                                 }
                         }
-                        
                         Rectangle()
                             .frame(width: 350, height: 1)
                     }
@@ -68,10 +68,9 @@ struct SignInView: View {
                     Spacer()
                     
                     Button {
-                        //sign up
                         signIn()
                     } label: {
-                        ZStack{
+                        ZStack {
                             RoundedRectangle(cornerRadius: 12)
                                 .frame(width: 290, height: 55)
                                 .foregroundStyle(.white)
@@ -79,7 +78,8 @@ struct SignInView: View {
                                 .foregroundStyle(Color.green)
                         }
                     }
-                    HStack{
+                    
+                    HStack {
                         Rectangle()
                             .frame(width: 120, height: 1)
                         Text("or")
@@ -87,45 +87,47 @@ struct SignInView: View {
                             .frame(width: 120, height: 1)
                     }
                     .foregroundStyle(.white)
-                    NavigationLink(destination: SignUpView()){
+                    
+                    NavigationLink(destination: SignUpView()) {
                         Text("Sign Up")
                             .frame(width: 290, height: 55)
                             .foregroundStyle(Color.white)
-                            .overlay{
+                            .overlay {
                                 RoundedRectangle(cornerRadius: 12)
                                     .stroke(.white, lineWidth: 2)
                             }
                     }
+                    
                     Spacer()
                 }
                 .frame(width: 350)
                 .onAppear {
-                    Auth.auth().addStateDidChangeListener { auth, user in
+                    Auth.auth().addStateDidChangeListener { _, user in
                         if user != nil {
                             isSignedIn.toggle()
                         }
                     }
                 }
+                
                 Text(errorMessage)
                     .foregroundStyle(.white)
                     .offset(y: 20)
-                    .frame(width: 350)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .ignoresSafeArea()
         }
     }
     
-    // Sign up function
-    func signIn(){
-        Auth.auth().signIn(withEmail: email, password: password) { result, error in
-            if error != nil {
-                errorMessage = String(error!.localizedDescription)
+    // Sign in function
+    private func signIn() {
+        Auth.auth().signIn(withEmail: email, password: password) { _, error in
+            if let error = error {
+                errorMessage = error.localizedDescription
             }
         }
     }
 }
 
-
 #Preview {
     SignInView()
+        .environmentObject(CourseDataModel())
 }
