@@ -15,13 +15,12 @@ struct SignInView: View {
     @State private var isSignedIn = false
     
     var body: some View {
-//        if isSignedIn {
-//            ContentView()
-//                .toolbarVisibility(.hidden)
-//        } else {
-//            signInContent
-//        }
-        signInContent
+        if isSignedIn {
+            ContentView()
+                .toolbarVisibility(.hidden)
+        } else {
+            signInContent
+        }
     }
     
     private var signInContent: some View {
@@ -73,10 +72,10 @@ struct SignInView: View {
                         
                         NavigationLink(destination: SignUpView()) {
                             Text("Sign Up")
-                                .frame(width: 290, height: 55)
+                                .frame(width: 300, height: 50)
                                 .foregroundStyle(Color.green)
                                 .overlay {
-                                    RoundedRectangle(cornerRadius: 12)
+                                    RoundedRectangle(cornerRadius: 10)
                                         .stroke(.green, lineWidth: 2)
                                 }
                         }
