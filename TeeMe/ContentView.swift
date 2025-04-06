@@ -13,7 +13,6 @@ struct ContentView: View {
     @EnvironmentObject var courseModel: CourseDataModel
     
     var body: some View {
-            
         if Auth.auth().currentUser != nil {
             TabView(selection: $selectedTab) {
                 MapView()
@@ -30,6 +29,7 @@ struct ContentView: View {
                     }
                     .tag(1)
             }
+            .tint(Color.green)
         } else {
             LogInView()
         }
