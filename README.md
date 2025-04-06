@@ -1,5 +1,5 @@
 # TeeMe
-TeeMe is a personal project of mine. TeeMe's purpose is to find close golf courses in the users area and show the available tee times for the day.
+TeeMe is a personal project of mine. TeeMe's purpose is to find close golf courses in the users area and show the available tee times for the day. (Unfortunately NBC has access to all of the tee time data and does not share with developers. Currently studying on how to make this a social media app for golf creators)
 
 ## Features
 TeeMe shows you golf courses by using user location and also shows a route from the user to the golf course when the course is selected.
