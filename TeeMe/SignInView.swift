@@ -15,12 +15,13 @@ struct SignInView: View {
     @State private var isSignedIn = false
     
     var body: some View {
-        if isSignedIn {
-            ContentView()
-                .toolbarVisibility(.hidden)
-        } else {
-            signInContent
-        }
+//        if isSignedIn {
+//            ContentView()
+//                .toolbarVisibility(.hidden)
+//        } else {
+//            signInContent
+//        }
+        signInContent
     }
     
     private var signInContent: some View {
@@ -28,79 +29,61 @@ struct SignInView: View {
             ZStack {
                 Color.green
                     .ignoresSafeArea()
+                Circle()
+                    .scale(1.7)
+                    .foregroundStyle(.white.opacity(0.35))
+                Circle()
+                    .scale(1.35)
+                    .foregroundStyle(.white.opacity(0.75))
                 
                 VStack {
-                    Spacer()
-                    
                     Text("Sign In")
                         .font(.largeTitle.weight(.heavy))
-                        .foregroundStyle(.white)
-                    
-                    Spacer()
-                    
-                    VStack(spacing: 20) {
-                        HStack {
-                            TextField("", text: $email)
-                                .textFieldStyle(.plain)
-                                .placeholder(when: email.isEmpty) {
-                                    Text("Email")
-                                        .font(.headline)
-                                        .bold()
-                                }
+                        .foregroundStyle(.green)
+                                        
+                    VStack {
+                        TextField("Email", text: $email)
+                            .padding()
+                            .frame(width: 300, height: 50)
+                            .background(Color.black.opacity(0.05))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                        
+                        SecureField("Password", text: $password)
+                            .padding()
+                            .frame(width: 300, height: 50)
+                            .background(Color.black.opacity(0.05))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                        
+                        Button("Sign In") {
+                            signIn()
                         }
-                        Rectangle()
-                            .frame(width: 350, height: 1)
+                        .foregroundStyle(.white.opacity(0.75))
+                        .frame(width: 300, height: 50)
+                        .background(Color.green)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                         
                         HStack {
-                            SecureField("", text: $password)
-                                .textFieldStyle(.plain)
-                                .placeholder(when: password.isEmpty) {
-                                    Text("Password")
-                                        .font(.headline)
-                                        .bold()
+                            Rectangle()
+                                .frame(width: 120, height: 1)
+                            Text("or")
+                            Rectangle()
+                                .frame(width: 120, height: 1)
+                        }
+                        .foregroundStyle(.green)
+                        
+                        NavigationLink(destination: SignUpView()) {
+                            Text("Sign Up")
+                                .frame(width: 290, height: 55)
+                                .foregroundStyle(Color.green)
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(.green, lineWidth: 2)
                                 }
                         }
-                        Rectangle()
-                            .frame(width: 350, height: 1)
                     }
-                    .foregroundStyle(.white)
+                    .tint(.green)
                     
-                    Spacer()
-                    
-                    Button {
-                        signIn()
-                    } label: {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .frame(width: 290, height: 55)
-                                .foregroundStyle(.white)
-                            Text("Sign In")
-                                .foregroundStyle(Color.green)
-                        }
-                    }
-                    
-                    HStack {
-                        Rectangle()
-                            .frame(width: 120, height: 1)
-                        Text("or")
-                        Rectangle()
-                            .frame(width: 120, height: 1)
-                    }
-                    .foregroundStyle(.white)
-                    
-                    NavigationLink(destination: SignUpView()) {
-                        Text("Sign Up")
-                            .frame(width: 290, height: 55)
-                            .foregroundStyle(Color.white)
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(.white, lineWidth: 2)
-                            }
-                    }
-                    
-                    Spacer()
                 }
-                .frame(width: 350)
                 .onAppear {
                     Auth.auth().addStateDidChangeListener { _, user in
                         if user != nil {
@@ -109,10 +92,11 @@ struct SignInView: View {
                     }
                 }
                 
-                Text(errorMessage)
-                    .foregroundStyle(.white)
-                    .offset(y: 20)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // FIND A BETTER WAY TO DISPLAY ERROR MESSAGE
+//                Text(errorMessage)
+//                    .foregroundStyle(.white)
+//                    .offset(y: 20)
+//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
     }

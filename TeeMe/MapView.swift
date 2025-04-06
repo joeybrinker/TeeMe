@@ -121,7 +121,6 @@ struct MapView: View {
             Spacer()
         }
         .padding()
-        //.background(.thinMaterial)
     }
     
     // MARK: - Helper Methods

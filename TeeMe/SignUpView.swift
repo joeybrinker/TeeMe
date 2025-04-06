@@ -15,12 +15,13 @@ struct SignUpView: View {
     @State private var isSignedIn = false
     
     var body: some View {
-        if isSignedIn {
-            ContentView()
-                .toolbarVisibility(.hidden)
-        } else {
-            signUpContent
-        }
+//        if isSignedIn {
+//            ContentView()
+//                .toolbarVisibility(.hidden)
+//        } else {
+//            signUpContent
+//        }
+        signUpContent
     }
     
     private var signUpContent: some View {
