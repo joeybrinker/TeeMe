@@ -26,22 +26,11 @@ struct FavoritesView: View {
     }
     
     private var emptyStateView: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "star")
-                .font(.system(size: 60))
-                .foregroundColor(.gray)
-            
-            Text("No Favorite Courses")
-                .font(.headline)
-            
-            Text("Courses you mark as favorites will appear here")
-                .font(.subheadline)
-                .multilineTextAlignment(.center)
-                .foregroundColor(.secondary)
-                .padding(.horizontal)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        ContentUnavailableView(
+            "No Favorites",
+            systemImage: "star.slash",
+            description: Text("Courses you favorite will appear here.")
+        )
     }
     
     private var favoritesList: some View {
@@ -73,6 +62,8 @@ struct FavoritesView: View {
         }
         .sheet(item: $selectedCourse) { course in
             CourseDetailView(course: course)
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(40)
         }
     }
 }
