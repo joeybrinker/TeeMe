@@ -52,6 +52,7 @@ struct FavoritesView: View {
                         _ = courseModel.toggleFavorite(for: course)
                     } label: {
                         Label("Remove", systemImage: "trash")
+                            .tint(.red)
                     }
                 }
                 .contentShape(Rectangle())
@@ -100,7 +101,8 @@ struct CourseDetailView: View {
                     VStack(alignment: .leading) {
                         Text("Phone")
                             .font(.headline)
-                        Text(phone)
+                        //Text(phone)
+                        Link(phone, destination: URL(string: "tel://\(phone)")!)
                     }
                 }
                 

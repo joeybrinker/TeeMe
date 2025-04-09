@@ -11,7 +11,6 @@ import SwiftUI
 struct SearchModel {
     
     // Bindings to parent view state
-    //@Binding var position: MapCameraPosition
     @Binding var searchResults: [MKMapItem]
     
     // Optional region to search within

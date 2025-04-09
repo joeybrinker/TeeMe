@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import FirebaseAuth
 
 // Default location if user location isn't available
 extension CLLocationCoordinate2D {
@@ -89,6 +90,17 @@ struct MapView: View {
         HStack {
             Spacer()
             VStack(spacing: 10) {
+                
+                // MARK: - DEVELOPMENT ONLY
+                Button("Sign Out") {
+                    do {
+                        try Auth.auth().signOut()
+                    } catch {
+                        print("Error signing out: \(error.localizedDescription)")
+                    }
+                }
+                // MARK: - DEVELOPMETN ONLY
+                
                 // Selected location info if available
                 if let selectedMapItem {
                     ZStack{
@@ -105,6 +117,7 @@ struct MapView: View {
                 }
                 
                 Button {
+                    route = nil
                     SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "golf course")
                 } label: {
                     ZStack{

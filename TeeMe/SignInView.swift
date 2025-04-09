@@ -46,12 +46,14 @@ struct SignInView: View {
                             .frame(width: 300, height: 50)
                             .background(Color.black.opacity(0.05))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .foregroundStyle(.green)
                         
                         SecureField("Password", text: $password)
                             .padding()
                             .frame(width: 300, height: 50)
                             .background(Color.black.opacity(0.05))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .foregroundStyle(.green)
                         
                         Button("Sign In") {
                             signIn()
@@ -60,6 +62,7 @@ struct SignInView: View {
                         .frame(width: 300, height: 50)
                         .background(Color.green)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
+                        
                         
                         HStack {
                             Rectangle()

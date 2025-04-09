@@ -30,6 +30,9 @@ struct ContentView: View {
                     .tag(1)
             }
             .tint(Color.green)
+            .onAppear{
+                courseModel.loadFavoritesFromFirebase()
+            }
         } else {
             LogInView()
         }
