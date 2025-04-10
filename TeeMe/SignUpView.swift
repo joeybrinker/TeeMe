@@ -46,12 +46,15 @@ struct SignUpView: View {
                             .frame(width: 300, height: 50)
                             .background(Color.black.opacity(0.05))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .foregroundStyle(.green)
+
                         
                         SecureField("Password", text: $password)
                             .padding()
                             .frame(width: 300, height: 50)
                             .background(Color.black.opacity(0.05))
                             .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .foregroundStyle(.green)
                         
                         Button("Sign Up") {
                             signUp()
@@ -70,7 +73,7 @@ struct SignUpView: View {
                         }
                         .foregroundStyle(.green)
                         
-                        NavigationLink(destination: SignUpView()) {
+                        NavigationLink(destination: SignInView()) {
                             Text("Sign In")
                                 .frame(width: 300, height: 50)
                                 .foregroundStyle(Color.green)
@@ -91,20 +94,23 @@ struct SignUpView: View {
                     }
                 }
                 
-                Text(errorMessage)
-                    .foregroundStyle(.white)
-                    .offset(y: 20)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // FIND A BETTER WAY TO DISPLAY ERROR MESSAGE
+//                Text(errorMessage)
+//                    .foregroundStyle(.white)
+//                    .offset(y: 20)
+//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .navigationBarBackButtonHidden()
     }
     
     // Sign up function
     private func signUp() {
-        Auth.auth().createUser(withEmail: email, password: password) { _, error in
+        Auth.auth().createUser(withEmail: email, password: password) { result, error in
             if let error = error {
                 errorMessage = error.localizedDescription
+            }
+            if let user = result?.user {
+                createUserDocument(for: user)
             }
         }
     }
@@ -113,17 +119,4 @@ struct SignUpView: View {
 #Preview {
     SignUpView()
         .environmentObject(CourseDataModel())
-}
-
-extension View {
-    func placeholder<Content: View>(
-        when shouldShow: Bool,
-        alignment: Alignment = .leading,
-        @ViewBuilder placeholder: () -> Content
-    ) -> some View {
-        ZStack(alignment: alignment) {
-            placeholder().opacity(shouldShow ? 1 : 0)
-            self
-        }
-    }
 }
