@@ -9,6 +9,8 @@ import SwiftUI
 import FirebaseAuth
 
 struct NEWLOGIN: View {
+    @EnvironmentObject var courseModel: CourseDataModel
+    
     @State private var email = ""
     @State private var password = ""
     @State private var errorMessage = ""
@@ -25,7 +27,7 @@ struct NEWLOGIN: View {
                 .ignoresSafeArea()
             RoundedRectangle(cornerRadius: 20)
                 .frame(width: 350, height: 450)
-                .foregroundStyle(.gray.opacity(0.9))
+                .foregroundStyle(.gray.opacity(0.95))
                 .padding()
             VStack {
                 Text("Join TeeMe")
@@ -44,7 +46,7 @@ struct NEWLOGIN: View {
                     Text(errorMessage)
                         .font(.caption)
                         .frame(width: 300)
-                    Button("Sign Up") {
+                    Button("Create Account") {
                         signUp()
                     }
                     .foregroundStyle(.green)
@@ -52,7 +54,10 @@ struct NEWLOGIN: View {
                     .frame(width: 300, height: 50)
                     .background(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
-                    
+                    Button("Cancel"){
+                        courseModel.showSignIn = false
+                    }
+                    .foregroundStyle(.primary)
                 }
             }
         }

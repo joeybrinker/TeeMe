@@ -103,9 +103,11 @@ struct CourseInfoView: View {
                 if Auth.auth().currentUser != nil{
                     if let selectedCourse = selectedMapItem {
                         isFavorited = courseModel.toggleFavorite(for: selectedCourse)
+                        courseModel.showSignIn = false
                     }
                 }
                 else {
+                    courseModel.showSignIn = true
                     print("USER NOT LOGGED IN")
                 }
             } label: {

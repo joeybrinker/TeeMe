@@ -32,23 +32,28 @@ struct MapView: View {
     // MARK: - View Body
     var body: some View {
         // Main map container
-        mainMapContent
-        // Map event handlers
-            .onMapCameraChange { context in
-                visibleRegion = context.region
-            }
-            .onChange(of: searchResults) { _, _ in
-                position = .automatic
-            }
-            .onChange(of: selectedMapItem) { _, _ in
-                getDirections()
-            }
-            .onAppear{
-                if timesloaded < 1 {
-                    SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "golf course")
-                    timesloaded += 1
+        ZStack{
+            mainMapContent
+            // Map event handlers
+                .onMapCameraChange { context in
+                    visibleRegion = context.region
                 }
+                .onChange(of: searchResults) { _, _ in
+                    position = .automatic
+                }
+                .onChange(of: selectedMapItem) { _, _ in
+                    getDirections()
+                }
+                .onAppear{
+                    if timesloaded < 1 {
+                        SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "golf course")
+                        timesloaded += 1
+                    }
+                }
+            if courseModel.showSignIn {
+                NEWLOGIN()
             }
+        }
     }
     
     // MARK: - UI Components

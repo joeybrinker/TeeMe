@@ -25,10 +25,11 @@ struct ContentView: View {
                     .environmentObject(courseModel)
                     .tabItem {
                         Label("Favorites", systemImage: "star")
+                        
                     }
                     .tag(1)
             }
-            .tint(Color.green)
+            .accentColor(.green) //Will be depreciated in later versions
             .onAppear{
                 courseModel.loadFavoritesFromFirebase()
             }

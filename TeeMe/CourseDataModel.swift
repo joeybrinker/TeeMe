@@ -13,6 +13,7 @@ import Contacts
 
 class CourseDataModel: ObservableObject {
     @Published var favoriteCourses: [MKMapItem] = []
+    @Published var showSignIn: Bool = false
     private let db = Firestore.firestore()
     
     init() {
