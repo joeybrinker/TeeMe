@@ -75,7 +75,7 @@ class CourseDataModel: ObservableObject {
                 if let websiteString = data["website"] as? String, let url = URL(string: websiteString) {
                     mapItem.url = url
                 }
-                
+            
                 // Add to favorites array
                 self.favoriteCourses.append(mapItem)
             }

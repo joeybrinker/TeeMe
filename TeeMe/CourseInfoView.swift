@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import FirebaseAuth
 
 struct CourseInfoView: View {
     // MARK: - Properties
@@ -99,8 +100,13 @@ struct CourseInfoView: View {
             
             // Favorite button - updated to use the course model
             Button {
-                if let selectedCourse = selectedMapItem {
-                    isFavorited = courseModel.toggleFavorite(for: selectedCourse)
+                if Auth.auth().currentUser != nil{
+                    if let selectedCourse = selectedMapItem {
+                        isFavorited = courseModel.toggleFavorite(for: selectedCourse)
+                    }
+                }
+                else {
+                    print("USER NOT LOGGED IN")
                 }
             } label: {
                 Image(systemName: courseModel.isFavorite(course: selectedMapItem!) ? "star.fill" : "star")

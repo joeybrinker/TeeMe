@@ -51,7 +51,7 @@ struct FavoritesView: View {
                     Button(role: .destructive) {
                         _ = courseModel.toggleFavorite(for: course)
                     } label: {
-                        Label("Remove", systemImage: "trash")
+                        Label("Delete", systemImage: "trash")
                             .tint(.red)
                     }
                 }
