@@ -161,8 +161,13 @@ class CourseDataModel: ObservableObject {
     }
     
     // Returns true if favorite, false otherwise
-    func isFavorite(course: MKMapItem) -> Bool {
-        self.favoriteCourses.contains(course)
+    func isFavorite(courseName: String) -> Bool {
+        if favoriteCourses.contains(where: { $0.name == courseName }) {
+            return true
+        }
+        else {
+            return false
+        }
     }
 }
 

@@ -26,11 +26,14 @@ struct MapView: View {
     @State private var locationManager = CLLocationManager()
     @State private var initialSearchPerformed = false
     
+    //Ease of use
+    @State private var timesloaded: Int8 = 0
+    
     // MARK: - View Body
     var body: some View {
         // Main map container
         mainMapContent
-            // Map event handlers
+        // Map event handlers
             .onMapCameraChange { context in
                 visibleRegion = context.region
             }
@@ -41,7 +44,10 @@ struct MapView: View {
                 getDirections()
             }
             .onAppear{
-                SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "golf course")
+                if timesloaded < 1 {
+                    SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "golf course")
+                    timesloaded += 1
+                }
             }
     }
     
