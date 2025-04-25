@@ -13,6 +13,7 @@ import Contacts
 
 class CourseDataModel: ObservableObject {
     @Published var favoriteCourses: [MKMapItem] = []
+    @Published var showSignIn: Bool = false
     private let db = Firestore.firestore()
     
     init() {
@@ -75,7 +76,7 @@ class CourseDataModel: ObservableObject {
                 if let websiteString = data["website"] as? String, let url = URL(string: websiteString) {
                     mapItem.url = url
                 }
-                
+            
                 // Add to favorites array
                 self.favoriteCourses.append(mapItem)
             }
@@ -161,8 +162,13 @@ class CourseDataModel: ObservableObject {
     }
     
     // Returns true if favorite, false otherwise
-    func isFavorite(course: MKMapItem) -> Bool {
-        self.favoriteCourses.contains(course)
+    func isFavorite(courseName: String) -> Bool {
+        if favoriteCourses.contains(where: { $0.name == courseName }) {
+            return true
+        }
+        else {
+            return false
+        }
     }
 }
 

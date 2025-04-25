@@ -13,7 +13,6 @@ struct ContentView: View {
     @EnvironmentObject var courseModel: CourseDataModel
     
     var body: some View {
-        if Auth.auth().currentUser != nil {
             TabView(selection: $selectedTab) {
                 MapView()
                     .environmentObject(courseModel)
@@ -26,16 +25,14 @@ struct ContentView: View {
                     .environmentObject(courseModel)
                     .tabItem {
                         Label("Favorites", systemImage: "star")
+                        
                     }
                     .tag(1)
             }
-            .tint(Color.green)
+            .accentColor(.green) //Will be depreciated in later versions
             .onAppear{
                 courseModel.loadFavoritesFromFirebase()
             }
-        } else {
-            LogInView()
-        }
     }
 }
 
