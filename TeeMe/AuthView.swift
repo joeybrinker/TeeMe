@@ -1,5 +1,5 @@
 //
-//  NEWLOGIN.swift
+//  LogInPopUpView.swift
 //  TeeMe
 //
 //  Created by Joseph Brinker on 4/16/25.
@@ -8,20 +8,27 @@
 import SwiftUI
 import FirebaseAuth
 
-struct NEWLOGIN: View {
+struct AuthView: View {
     @EnvironmentObject var courseModel: CourseDataModel
     
     @State private var email = ""
     @State private var password = ""
     @State private var errorMessage = ""
     @State private var isSignedIn = false
+    @State private var showSignInView = false
     
     var body: some View {
-        signUpContent
+        if showSignInView {
+            authView(isSignIn: true)
+        } else {
+            authView(isSignIn: false)
+        }
     }
     
-    private var signUpContent: some View {
-        ZStack{
+    // Combined authentication view for both sign-up and sign-in
+    private func authView(isSignIn: Bool) -> some View {
+        ZStack {
+            // Background layers
             Color.black
                 .opacity(0.35)
                 .ignoresSafeArea()
@@ -29,29 +36,36 @@ struct NEWLOGIN: View {
                 .frame(width: 350, height: 600)
                 .foregroundStyle(.white)
                 .padding()
+            
+            // Content
             VStack {
                 Spacer()
-                VStack(alignment: .leading){
-                    Image(systemName: "figure.golf")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.green)
-                    
-                    Text("Create Account")
-                        .font(.largeTitle.weight(.heavy))
-                        .foregroundStyle(.black)
-                    
-                    Spacer()
-                        .frame(height: 20)
-                }
-                .padding()
-                .frame(minWidth: 350)
                 
+                // Header
+                HStack {
+                    VStack(alignment: .leading) {
+                        Image(systemName: "figure.golf")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.green)
+                        
+                        Text(isSignIn ? "Sign In" : "Create Account")
+                            .font(.largeTitle.weight(.semibold))
+                            .foregroundStyle(.black)
+                        
+                        Spacer().frame(height: 20)
+                    }
+                    .padding()
+                    Spacer()
+                }
+                .padding(.horizontal)
+                
+                // Input fields
                 TextField("", text: $email)
                     .padding()
                     .background(.gray.opacity(0.1))
                     .frame(width: 300, height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .placeholder(when: email.isEmpty){
+                    .placeholder(when: email.isEmpty) {
                         Text("Email").foregroundStyle(.black.opacity(0.5))
                             .padding()
                     }
@@ -61,15 +75,19 @@ struct NEWLOGIN: View {
                     .background(.gray.opacity(0.1))
                     .frame(width: 300, height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .placeholder(when: password.isEmpty){
+                    .placeholder(when: password.isEmpty) {
                         Text("Password").foregroundStyle(.black.opacity(0.5))
                             .padding()
                     }
+                
+                // Error message
                 Text(errorMessage)
                     .font(.caption)
                     .frame(width: 300)
-                Button("Create Account") {
-                    signUp()
+                
+                // Action button
+                Button(isSignIn ? "Sign In" : "Create Account") {
+                    isSignIn ? signIn() : signUp()
                 }
                 .foregroundStyle(.white)
                 .fontWeight(.bold)
@@ -78,11 +96,12 @@ struct NEWLOGIN: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .padding()
                 
-                HStack{
-                    Text("If you already have an account")
+                // Toggle between sign-in and sign-up
+                HStack {
+                    Text(isSignIn ? "If you do not have an account" : "If you already have an account")
                         .foregroundStyle(.black)
-                    Button("Sign In"){
-                        //Sign In Content
+                    Button(isSignIn ? "Sign Up" : "Sign In") {
+                        showSignInView.toggle()
                     }
                     .foregroundStyle(.green)
                 }
@@ -90,9 +109,11 @@ struct NEWLOGIN: View {
                 
                 Spacer()
                 
-                Button("Cancel"){
+                // Cancel button
+                Button("Cancel") {
                     courseModel.showSignIn = false
                 }
+                .font(.body.weight(.bold))
                 .foregroundStyle(.black)
                 .padding()
             }
@@ -107,7 +128,9 @@ struct NEWLOGIN: View {
         }
     }
     
-    // Sign up function
+
+    
+    // Authentication functions
     private func signUp() {
         Auth.auth().createUser(withEmail: email, password: password) { result, error in
             if let error = error {
@@ -115,6 +138,14 @@ struct NEWLOGIN: View {
             }
             if let user = result?.user {
                 createUserDocument(for: user)
+            }
+        }
+    }
+    
+    private func signIn() {
+        Auth.auth().signIn(withEmail: email, password: password) { result, error in
+            if let error = error {
+                errorMessage = error.localizedDescription
             }
         }
     }
@@ -135,6 +166,6 @@ extension View {
 }
 
 #Preview {
-    NEWLOGIN()
+    AuthView()
         .environmentObject(CourseDataModel())
 }

@@ -51,7 +51,7 @@ struct MapView: View {
                     }
                 }
             if courseModel.showSignIn {
-                NEWLOGIN()
+                AuthView()
             }
         }
     }
