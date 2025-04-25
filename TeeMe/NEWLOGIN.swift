@@ -26,40 +26,77 @@ struct NEWLOGIN: View {
                 .opacity(0.35)
                 .ignoresSafeArea()
             RoundedRectangle(cornerRadius: 20)
-                .frame(width: 350, height: 450)
-                .foregroundStyle(.gray.opacity(0.95))
+                .frame(width: 350, height: 600)
+                .foregroundStyle(.white)
                 .padding()
             VStack {
-                Text("Join TeeMe")
-                    .font(.largeTitle.weight(.heavy))
-                    .foregroundStyle(.white)
+                Spacer()
+                VStack(alignment: .leading){
+                    Image(systemName: "figure.golf")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.green)
+                    
+                    Text("Create Account")
+                        .font(.largeTitle.weight(.heavy))
+                        .foregroundStyle(.black)
+                    
+                    Spacer()
+                        .frame(height: 20)
+                }
+                .padding()
+                .frame(minWidth: 350)
                 
-                VStack {
-                    TextField("Email", text: $email)
-                        .padding()
-                        .frame(width: 300, height: 50)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                    SecureField("Password", text: $password)
-                        .padding()
-                        .frame(width: 300, height: 50)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                    Text(errorMessage)
-                        .font(.caption)
-                        .frame(width: 300)
-                    Button("Create Account") {
-                        signUp()
+                TextField("", text: $email)
+                    .padding()
+                    .background(.gray.opacity(0.1))
+                    .frame(width: 300, height: 50)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .placeholder(when: email.isEmpty){
+                        Text("Email").foregroundStyle(.black.opacity(0.5))
+                            .padding()
+                    }
+                
+                SecureField("", text: $password)
+                    .padding()
+                    .background(.gray.opacity(0.1))
+                    .frame(width: 300, height: 50)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .placeholder(when: password.isEmpty){
+                        Text("Password").foregroundStyle(.black.opacity(0.5))
+                            .padding()
+                    }
+                Text(errorMessage)
+                    .font(.caption)
+                    .frame(width: 300)
+                Button("Create Account") {
+                    signUp()
+                }
+                .foregroundStyle(.white)
+                .fontWeight(.bold)
+                .frame(width: 300, height: 50)
+                .background(.green)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .padding()
+                
+                HStack{
+                    Text("If you already have an account")
+                        .foregroundStyle(.black)
+                    Button("Sign In"){
+                        //Sign In Content
                     }
                     .foregroundStyle(.green)
-                    .fontWeight(.bold)
-                    .frame(width: 300, height: 50)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    Button("Cancel"){
-                        courseModel.showSignIn = false
-                    }
-                    .foregroundStyle(.primary)
                 }
+                .font(.system(size: 16))
+                
+                Spacer()
+                
+                Button("Cancel"){
+                    courseModel.showSignIn = false
+                }
+                .foregroundStyle(.black)
+                .padding()
             }
+            .frame(width: 350, height: 600)
         }
         .onAppear {
             Auth.auth().addStateDidChangeListener { _, user in
@@ -79,6 +116,20 @@ struct NEWLOGIN: View {
             if let user = result?.user {
                 createUserDocument(for: user)
             }
+        }
+    }
+}
+
+// Extension for the placeholder functionality
+extension View {
+    func placeholder<Content: View>(
+        when shouldShow: Bool,
+        alignment: Alignment = .leading,
+        @ViewBuilder placeholder: () -> Content) -> some View {
+        
+        ZStack(alignment: alignment) {
+            placeholder().opacity(shouldShow ? 1 : 0)
+            self
         }
     }
 }
