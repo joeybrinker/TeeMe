@@ -110,7 +110,7 @@ struct MapView: View {
                         print("Error signing out: \(error.localizedDescription)")
                     }
                 }
-                // MARK: - DEVELOPMETN ONLY
+                // MARK: - DEVELOPMENT ONLY
                 
                 // Selected location info if available
                 if let selectedMapItem {

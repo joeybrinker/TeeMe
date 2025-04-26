@@ -65,6 +65,8 @@ struct AuthView: View {
                     .background(.gray.opacity(0.1))
                     .frame(width: 300, height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .foregroundStyle(.black)
+                    .autocorrectionDisabled()
                     .placeholder(when: email.isEmpty) {
                         Text("Email").foregroundStyle(.black.opacity(0.5))
                             .padding()
@@ -75,6 +77,7 @@ struct AuthView: View {
                     .background(.gray.opacity(0.1))
                     .frame(width: 300, height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .foregroundStyle(.black)
                     .placeholder(when: password.isEmpty) {
                         Text("Password").foregroundStyle(.black.opacity(0.5))
                             .padding()
@@ -84,6 +87,7 @@ struct AuthView: View {
                 Text(errorMessage)
                     .font(.caption)
                     .frame(width: 300)
+                    .foregroundStyle(.black)
                 
                 // Action button
                 Button(isSignIn ? "Sign In" : "Create Account") {
@@ -138,6 +142,7 @@ struct AuthView: View {
             }
             if let user = result?.user {
                 createUserDocument(for: user)
+                courseModel.showSignIn = false
             }
         }
     }
@@ -146,6 +151,9 @@ struct AuthView: View {
         Auth.auth().signIn(withEmail: email, password: password) { result, error in
             if let error = error {
                 errorMessage = error.localizedDescription
+            }
+            else{
+                courseModel.showSignIn = false
             }
         }
     }
