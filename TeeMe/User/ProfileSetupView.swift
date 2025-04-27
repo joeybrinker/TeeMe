@@ -176,6 +176,7 @@ struct ProfileSetupView: View {
             if success {
                 // If successful, dismiss the view
                 dismiss()
+                
             }
             // If not successful, the view model will set an error message
             // which will trigger the alert via the binding
