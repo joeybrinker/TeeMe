@@ -22,3 +22,4 @@ func createUserDocument(for user: User) {
         }
     }
 }
+
