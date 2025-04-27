@@ -28,6 +28,13 @@ struct ContentView: View {
                         
                     }
                     .tag(1)
+                
+                UserProfileView()
+                    .environmentObject(courseModel)
+                    .tabItem {
+                        Label("Profile", systemImage: "person")
+                    }
+                    .tag(2)
             }
             .accentColor(.green) //Will be depreciated in later versions
             .onAppear{

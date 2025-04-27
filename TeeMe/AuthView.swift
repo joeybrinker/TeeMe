@@ -90,15 +90,19 @@ struct AuthView: View {
                     .foregroundStyle(.black)
                 
                 // Action button
-                Button(isSignIn ? "Sign In" : "Create Account") {
+                Button {
                     isSignIn ? signIn() : signUp()
+                } label: {
+                    ZStack{
+                        RoundedRectangle(cornerRadius: 10)
+                            .frame(width: 300, height: 50)
+                            .foregroundStyle(.green)
+                            .padding()
+                        Text(isSignIn ? "Sign In" : "Create Account")
+                            .fontWeight(.bold)
+                            .foregroundStyle(.white)
+                    }
                 }
-                .foregroundStyle(.white)
-                .fontWeight(.bold)
-                .frame(width: 300, height: 50)
-                .background(.green)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .padding()
                 
                 // Toggle between sign-in and sign-up
                 HStack {
