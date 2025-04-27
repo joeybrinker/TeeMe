@@ -82,6 +82,7 @@ struct UserProfileView: View {
                 .sheet(isPresented: $showingEditProfile) {
                     ProfileSetupView()
                         .environmentObject(courseModel)
+                        .environmentObject(viewModel)
                 }
                 // Enable pull-to-refresh functionality
                 .refreshable {
