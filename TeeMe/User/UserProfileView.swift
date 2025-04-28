@@ -54,6 +54,9 @@ struct UserProfileView: View {
                     ProfileSetupView()
                         .environmentObject(courseModel) // Pass course data to setup view
                 }
+                .onAppear() {
+                    viewModel.loadCurrentUser()
+                }
         }
         // Profile View - Fully authenticated and profile set up
         else {
@@ -79,6 +82,7 @@ struct UserProfileView: View {
                 .sheet(isPresented: $showingEditProfile) {
                     ProfileSetupView()
                         .environmentObject(courseModel)
+                        .environmentObject(viewModel)
                 }
                 // Enable pull-to-refresh functionality
                 .refreshable {

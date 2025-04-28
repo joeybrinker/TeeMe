@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import FirebaseAuth
 
 struct FavoritesView: View {
     @EnvironmentObject var courseModel: CourseDataModel
@@ -15,7 +16,7 @@ struct FavoritesView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                if courseModel.favoriteCourses.isEmpty {
+                if courseModel.favoriteCourses.isEmpty ||  Auth.auth().currentUser == nil {
                     emptyStateView
                 } else {
                     favoritesList

@@ -25,7 +25,6 @@ struct ContentView: View {
                     .environmentObject(courseModel)
                     .tabItem {
                         Label("Favorites", systemImage: "star")
-                        
                     }
                     .tag(1)
                 
