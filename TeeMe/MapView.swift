@@ -69,7 +69,7 @@ struct MapView: View {
             ForEach(searchResults, id: \.self) { result in
                 Marker(item: result)
             }
-            .annotationSubtitles(.visible)
+            .annotationSubtitles(.automatic)
             
             // Add the route overlay when available
             if let route {

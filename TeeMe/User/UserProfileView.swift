@@ -31,11 +31,11 @@ struct UserProfileView: View {
         // User not signed in - Display sign-in prompt
         if Auth.auth().currentUser == nil {
             ZStack{
-                notSignedInView   // Custom view defined below
+                notSignedInView
                 
                 // Conditionally show the authentication view as an overlay
                 if courseModel.showSignIn {
-                    AuthView()    // Authentication view for login/signup
+                    AuthView()
                 }
             }
         }
@@ -48,11 +48,18 @@ struct UserProfileView: View {
 //        }
         // Profile not set up - User is authenticated but hasn't completed profile
         else if viewModel.currentUser.id.isEmpty {
-            profileNotSetupView   // Custom view defined below
+            profileNotSetupView
                 // Present the profile setup sheet when showingEditProfile is true
                 .sheet(isPresented: $showingEditProfile) {
                     ProfileSetupView()
-                        .environmentObject(courseModel) // Pass course data to setup view
+                        .environmentObject(courseModel)
+                        .environmentObject(viewModel)
+                        .onDisappear {
+                            viewModel.loadCurrentUser()
+                        }
+                }
+                .onAppear {
+                    viewModel.loadCurrentUser()
                 }
                 .onAppear() {
                     viewModel.loadCurrentUser()
@@ -60,8 +67,8 @@ struct UserProfileView: View {
         }
         // Profile View - Fully authenticated and profile set up
         else {
-            NavigationStack{      // Container for navigable content
-                ScrollView{       // Makes content scrollable
+            NavigationStack{
+                ScrollView{
                     VStack(spacing: 20){
                         profileContentView  // Main profile content defined below
                     }
@@ -134,8 +141,8 @@ struct UserProfileView: View {
         VStack(spacing: 20) {
             // Unavailable content placeholder with description
             ContentUnavailableView("Complete your profile",
-                                  systemImage: "person.crop.circle.badge.plus",
-                                  description: Text("Set up your golf profile to get the most out of TeeMe."))
+                                   systemImage: "person.crop.circle.badge.plus",
+                                   description: Text("Set up your golf profile to get the most out of TeeMe."))
             
             // Profile setup button
             Button {
@@ -178,6 +185,7 @@ struct UserProfileView: View {
                 do {
                     try Auth.auth().signOut()  // Firebase signOut method
                     viewModel.loadCurrentUser()  // Reload user state after sign out
+                    courseModel.favoriteCourses.removeAll() // Reset favorite courses
                 }
                 catch {
                     print("Error signing out: \(error)")  // Error handling
@@ -293,6 +301,6 @@ struct UserProfileView: View {
 /// Creates instances of required models for the preview canvas
 #Preview {
     UserProfileView()
-        .environmentObject(CourseDataModel())  // Inject course data model
-        .environmentObject(UserProfileViewModel())  // Inject view model
+        .environmentObject(CourseDataModel())
+        .environmentObject(UserProfileViewModel())
 }

@@ -15,7 +15,7 @@ struct AuthView: View {
     @State private var password = ""
     @State private var errorMessage = ""
     @State private var isSignedIn = false
-    @State private var showSignInView = true
+    @State private var showSignInView = false
     
     var body: some View {
         if showSignInView {
@@ -158,6 +158,7 @@ struct AuthView: View {
             }
             else{
                 courseModel.showSignIn = false
+                courseModel.loadFavoritesFromFirebase()
             }
         }
     }

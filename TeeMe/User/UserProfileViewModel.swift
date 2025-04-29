@@ -24,7 +24,6 @@ class UserProfileViewModel: ObservableObject {
     
     // Published properties that the UI can observe and react to
     @Published var currentUser: UserProfileModel = .empty()  // The current user's profile
-    @Published var isLoading = false                         // Indicates whether an operation is in progress
     @Published var errorMessage: String?                     // Contains any error message to display
     
     /**
@@ -49,17 +48,12 @@ class UserProfileViewModel: ObservableObject {
             return
         }
         
-        // Show loading indicator
-        isLoading = true
-        
         // Call the service to get the user profile
         userService.getUserProfile(userId: user.uid) { [weak self] result in
             guard let self = self else { return }  // Prevent memory leaks
             
             // Always update UI on the main thread
             DispatchQueue.main.async {
-                // Hide loading indicator
-                self.isLoading = false
                 
                 // Handle the result
                 switch result {
@@ -102,9 +96,6 @@ class UserProfileViewModel: ObservableObject {
             return
         }
         
-        // Show loading indicator
-        isLoading = true
-        
         // Convert handicap string to Double if provided
         // flatMap will return nil if the conversion fails or if handicap is nil
         let handicapValue: Double? = handicap.flatMap { Double($0) }
@@ -123,8 +114,6 @@ class UserProfileViewModel: ObservableObject {
                 
                 // Always update UI on the main thread
                 DispatchQueue.main.async {
-                    // Hide loading indicator
-                    self.isLoading = false
                     
                     // Handle the result
                     switch result {
@@ -149,8 +138,6 @@ class UserProfileViewModel: ObservableObject {
                 
                 // Always update UI on the main thread
                 DispatchQueue.main.async {
-                    // Hide loading indicator
-                    self.isLoading = false
                     
                     // Handle the result
                     switch result {
