@@ -102,16 +102,6 @@ struct MapView: View {
             Spacer()
             VStack(spacing: 10) {
                 
-                // MARK: - DEVELOPMENT ONLY
-                Button("Sign Out") {
-                    do {
-                        try Auth.auth().signOut()
-                    } catch {
-                        print("Error signing out: \(error.localizedDescription)")
-                    }
-                }
-                // MARK: - DEVELOPMENT ONLY
-                
                 // Selected location info if available
                 if let selectedMapItem {
                     ZStack{

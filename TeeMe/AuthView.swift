@@ -158,6 +158,7 @@ struct AuthView: View {
             }
             else{
                 courseModel.showSignIn = false
+                courseModel.loadFavoritesFromFirebase()
             }
         }
     }
