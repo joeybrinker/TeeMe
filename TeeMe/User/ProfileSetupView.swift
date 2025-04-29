@@ -8,7 +8,7 @@
 // It allows users to create or edit their profile information including username,
 // display name, and handicap.
 
-import SwiftUI  // Framework for building the UI
+import SwiftUI
 
 /// ProfileSetupView: A view that allows users to set up or edit their profile
 /// Handles both new profile creation and editing of existing profiles
@@ -31,23 +31,20 @@ struct ProfileSetupView: View {
     // MARK: - Body
     
     var body: some View {
-        NavigationStack {  // Container for navigable content
-            ZStack {  // ZStack allows overlaying the progress view when loading
+        NavigationStack {
+            ZStack {
                 VStack(spacing: 20) {
-                    // Form for user details (defined as a separate view below)
                     profileFormView
                     
                     // Submit button - saves profile information
                     Button {
-                        saveProfile()  // Call the saveProfile method when tapped
+                        saveProfile()
                     } label: {
                         ZStack{
-                            // Green rounded rectangle button styling
                             RoundedRectangle(cornerRadius: 10)
                                 .frame(width: 300, height: 50)
                                 .foregroundStyle(.green)
                                 .padding()
-                            // Button text
                             Text("Submit")
                                 .fontWeight(.bold)
                                 .foregroundStyle(.white)
@@ -57,10 +54,10 @@ struct ProfileSetupView: View {
                     // Disable button if required fields are empty
                     .disabled(username.isEmpty || displayName.isEmpty)
                     
-                    Spacer()  // Push content to the top
+                    Spacer()
                 }
                 .padding()
-                .navigationTitle("Set Up Your Profile")  // Set navigation bar title
+                .navigationTitle("Set Up Your Profile")
                 .navigationBarTitleDisplayMode(.inline)  // Use inline title style
                 .toolbar {
                     // Add a cancel button to the top left of the navigation bar
@@ -69,13 +66,6 @@ struct ProfileSetupView: View {
                             dismiss()  // Dismiss this view when Cancel is tapped
                         }
                     }
-                }
-                
-                // Overlay a progress view when loading
-                if viewModel.isLoading {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
             .onAppear {
@@ -187,6 +177,4 @@ struct ProfileSetupView: View {
 /// Creates an instance of ProfileSetupView for the preview canvas
 #Preview {
     ProfileSetupView()
-    // Note: This preview doesn't include the EnvironmentObject
-    // so some functionality won't work in the preview
 }
