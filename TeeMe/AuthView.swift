@@ -15,7 +15,7 @@ struct AuthView: View {
     @State private var password = ""
     @State private var errorMessage = ""
     @State private var isSignedIn = false
-    @State private var showSignInView = false
+    @State private var showSignInView = true
     
     var body: some View {
         if showSignInView {

@@ -15,8 +15,8 @@ import SwiftUI
 struct ProfileSetupView: View {
     // MARK: - Properties
     
-    // StateObject to maintain the view model instance throughout the view lifecycle
-    @StateObject var viewModel = UserProfileViewModel()
+    // EnvironmentObject to maintain the view model instance throughout the view lifecycle
+    @EnvironmentObject var viewModel: UserProfileViewModel
     
     // State variables to hold form input values
     @State private var username: String = ""       // User's unique username
@@ -41,13 +41,31 @@ struct ProfileSetupView: View {
                         saveProfile()
                     } label: {
                         ZStack{
-                            RoundedRectangle(cornerRadius: 10)
-                                .frame(width: 300, height: 50)
-                                .foregroundStyle(.green)
-                                .padding()
-                            Text("Submit")
-                                .fontWeight(.bold)
-                                .foregroundStyle(.white)
+                            if username.isEmpty || displayName.isEmpty {
+                                // Green rounded rectangle button styling
+                                RoundedRectangle(cornerRadius: 10)
+                                    .frame(width: 300, height: 50)
+                                    .foregroundStyle(.green)
+                                    .padding()
+                                // Button text
+                                Text("Submit")
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.white)
+                                RoundedRectangle(cornerRadius: 10)
+                                    .frame(width: 300, height: 50)
+                                    .foregroundStyle(.black.opacity(0.25))
+                                    .padding()
+                            } else {
+                                // Green rounded rectangle button styling
+                                RoundedRectangle(cornerRadius: 10)
+                                    .frame(width: 300, height: 50)
+                                    .foregroundStyle(.green)
+                                    .padding()
+                                // Button text
+                                Text("Submit")
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(.white)
+                            }
                         }
                     }
                     .padding()
@@ -166,6 +184,7 @@ struct ProfileSetupView: View {
             if success {
                 // If successful, dismiss the view
                 dismiss()
+                
             }
             // If not successful, the view model will set an error message
             // which will trigger the alert via the binding
@@ -177,4 +196,5 @@ struct ProfileSetupView: View {
 /// Creates an instance of ProfileSetupView for the preview canvas
 #Preview {
     ProfileSetupView()
+        .environmentObject(UserProfileViewModel())
 }

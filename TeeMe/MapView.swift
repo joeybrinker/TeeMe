@@ -45,6 +45,7 @@ struct MapView: View {
                     getDirections()
                 }
                 .onAppear{
+                    locationManager.requestWhenInUseAuthorization()
                     if timesloaded < 1 {
                         SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "golf course")
                         timesloaded += 1
@@ -72,11 +73,23 @@ struct MapView: View {
             
             // Add the route overlay when available
             if let route {
+                // Create a wider, blurred line for the glow effect
+                MapPolyline(route.polyline)
+                    .stroke(
+                        Color.green.opacity(0.5),
+                        style: StrokeStyle(
+                            lineWidth: 8,
+                            lineCap: .round,
+                            lineJoin: .round
+                        )
+                    )
+                
+                // Main route line with a gradient
                 MapPolyline(route.polyline)
                     .stroke(
                         .green,
                         style: StrokeStyle(
-                            lineWidth: 5,
+                            lineWidth: 4,
                             lineCap: .round,
                             lineJoin: .round
                         )
@@ -87,10 +100,7 @@ struct MapView: View {
             MapUserLocationButton()
             MapPitchToggle()
         }
-        .onAppear {
-            locationManager.requestWhenInUseAuthorization()
-        }
-        .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
+        .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
         .safeAreaInset(edge: .bottom) {
             bottomOverlay
         }
