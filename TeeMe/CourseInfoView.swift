@@ -83,11 +83,12 @@ struct CourseInfoView: View {
                     
                     
                     
-                    //                Text("Name")
-                    //                Text("Complete Address")
-                    //                Text("Phone Number")
-                    //                Text("Travel Time")
+//                    Text("Name")
+//                    Text("Complete Address")
+//                    Text("Phone Number")
+//                    Text("Travel Time")
                 }
+                .padding()
                 
                 Spacer()
                 
@@ -115,14 +116,12 @@ struct CourseInfoView: View {
                 LookAroundPreview(initialScene: scene)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .frame(width: 350, height: 175)
-                    .padding()
             }
             else {
                 ContentUnavailableView("No preview available", systemImage: "eye.slash")
                     .frame(width: 350, height: 175)
             }
         }
-        .padding()
         .onAppear {
             fetchLookAroundPreview()
         }

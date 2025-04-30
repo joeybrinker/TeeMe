@@ -31,6 +31,8 @@ struct MapView: View {
     //Ease of use
     @State private var timesloaded: Int8 = 0
     
+    @FocusState private var searchIsFocused: Bool
+    
     // MARK: - View Body
     var body: some View {
         // Main map container
@@ -114,17 +116,56 @@ struct MapView: View {
                     Image(systemName: "magnifyingglass")
                         .font(.body)
                     TextField("Search for a course...", text: $searchText)
+                        .autocorrectionDisabled()
                         .font(.subheadline)
+                        .frame(maxWidth: 350, maxHeight: 50)
+                        .onSubmit {
+                            searchText = ""
+                            searchIsFocused = false
+                        }
+                        .focused($searchIsFocused)
+                    if !searchText.isEmpty {
+                        Image(systemName: "xmark.circle.fill")
+                            .onTapGesture {
+                                searchText = ""
+                                searchIsFocused = false
+                            }
+                    }
                 }
                 .padding()
             }
             .frame(maxWidth: 350, maxHeight: 50)
         }
+        .onSubmit {
+            if !searchText.isEmpty {
+                SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: searchText)
+                searchIsFocused = false
+                searchText = ""
+            }
+            else {
+                searchIsFocused = false
+                searchText = ""
+            }
+        }
         // Search Button
         .overlay(alignment: .bottom) {
             Button {
                 route = nil
-                SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "Golf Course")
+                if searchIsFocused {
+                    if !searchText.isEmpty {
+                        SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: searchText)
+                        searchIsFocused = false
+                        searchText = ""
+                    }
+                    else {
+                        searchIsFocused = false
+                        searchText = ""
+                    }
+                }
+                else {
+                    SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "Golf Course")
+                }
+                
             } label: {
                 ZStack{
                     RoundedRectangle(cornerRadius: 35)
@@ -138,12 +179,9 @@ struct MapView: View {
                 .shadow(radius: 10)
             }
         }
-        .onSubmit {
-            SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: searchText)
-        }
+        
         .mapControls {
             MapUserLocationButton()
-            MapPitchToggle()
         }
         .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
         //Course Info View Sheet
