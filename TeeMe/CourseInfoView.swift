@@ -53,68 +53,93 @@ struct CourseInfoView: View {
     
     // Information overlay showing name and travel time
     private var overlayContent: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                // Location name
-                if let name = selectedMapItem?.name {
-                    Text(name)
-                        .font(.headline)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(6)
-                }
-                
-                // Phone number if available
-                if let phoneNumber = selectedMapItem?.phoneNumber {
-                    Text(phoneNumber)
-                        .font(.headline)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(6)
-                }
-                
-                // Address if available
-                if let address = selectedMapItem?.placemark.postalAddress {
-                    let completeAddress = "\(address.street), \(address.city), \(address.state)"
-                    Text(completeAddress)
-                        .font(.headline)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(6)
-                }
-                
-                // Travel time if available
-                if let time = travelTime {
-                    Text("Travel time: \(time)")
-                        .font(.subheadline)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(6)
-                }
-            }
-            .padding(12)
-            
-            // Favorite button - updated to use the course model
-            Button {
-                if Auth.auth().currentUser != nil{
-                    if let selectedCourse = selectedMapItem {
-                        isFavorited = courseModel.toggleFavorite(for: selectedCourse)
-                        courseModel.showSignIn = false
+        VStack{
+            HStack {
+                VStack(alignment: .leading, spacing: 5) {
+                    // Location name
+                    if let name = selectedMapItem?.name {
+                        Text(name)
                     }
+                    
+                    // Address if available
+                    if let address = selectedMapItem?.placemark.postalAddress {
+                        let completeAddress = "\(address.street), \(address.city), \(address.state)"
+                        Text(completeAddress)
+                        
+                    }
+                    
+                    // Phone number if available
+                    if let phoneNumber = selectedMapItem?.phoneNumber {
+                        Text(phoneNumber)
+                        
+                    }
+                    
+                    // Travel time if available
+                    if let time = travelTime {
+                        Text("Travel time: \(time)")
+                            .font(.headline)
+                        
+                    }
+                    
+                    
+                    
+                    //                Text("Name")
+                    //                Text("Complete Address")
+                    //                Text("Phone Number")
+                    //                Text("Travel Time")
                 }
-                else {
-                    courseModel.showSignIn = true
-                    print("USER NOT LOGGED IN")
+                
+                Spacer()
+                
+                // Favorite button - updated to use the course model
+                Button {
+                    if Auth.auth().currentUser != nil{
+                        if let selectedCourse = selectedMapItem {
+                            isFavorited = courseModel.toggleFavorite(for: selectedCourse)
+                            courseModel.showSignIn = false
+                            print(selectedCourse.id)
+                        }
+                    }
+                    else {
+                        courseModel.showSignIn = true
+                    }
+                } label: {
+                    Image(systemName: courseModel.isFavorite(courseName: selectedMapItem?.placemark.name ?? "") ? "star.fill" : "star")
+                        .foregroundStyle(.green)
                 }
-            } label: {
-                Image(systemName: courseModel.isFavorite(courseName: selectedMapItem?.placemark.name ?? "") ? "star.fill" : "star")
-                    .foregroundStyle(.green)
+                .font(.title3)
             }
-            .font(.title3)
+            .padding(.horizontal)
+            
+            if let scene = lookAroundScene {
+                LookAroundPreview(initialScene: scene)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .frame(width: 350, height: 175)
+                    .padding()
+            }
+            else {
+                ContentUnavailableView("No preview available", systemImage: "eye.slash")
+                    .frame(width: 350, height: 175)
+            }
+        }
+        .padding()
+        .onAppear {
+            fetchLookAroundPreview()
+        }
+        .onChange(of: selectedMapItem) { _, _ in
+            fetchLookAroundPreview()
+        }
+    }
+}
+
+extension CourseInfoView {
+    func fetchLookAroundPreview() {
+        if let selectedMapItem {
+            lookAroundScene = nil
+            Task {
+                let request = MKLookAroundSceneRequest(mapItem: selectedMapItem)
+                lookAroundScene = try? await request.scene
+            }
         }
     }
 }
