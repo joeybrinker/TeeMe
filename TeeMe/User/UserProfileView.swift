@@ -39,13 +39,7 @@ struct UserProfileView: View {
                 }
             }
         }
-        // Commented out loading state - Could be uncommented for use
-//        // Loading state
-//        else if viewModel.isLoading {
-//            ProgressView()
-//                .scaleEffect(1.5)
-//                .padding()
-//        }
+
         // Profile not set up - User is authenticated but hasn't completed profile
         else if viewModel.currentUser.id.isEmpty {
             profileNotSetupView
@@ -205,6 +199,7 @@ struct UserProfileView: View {
                 .scaledToFit()
                 .frame(width: 120, height: 120)
                 .foregroundStyle(.gray)
+                .fontWeight(.thin)
             
             // Name and username
             VStack(spacing: 5) {

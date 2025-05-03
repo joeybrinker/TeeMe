@@ -38,7 +38,7 @@ struct MapView: View {
         // Main map container
         ZStack{
             mainMapContent
-            
+
             // Map event handlers
                 .onMapCameraChange { context in
                     visibleRegion = context.region
@@ -107,35 +107,52 @@ struct MapView: View {
                     )
             }
         }
-        //Search Bar
-        .overlay(alignment: .top) {
-            ZStack{
-                RoundedRectangle(cornerRadius: 12)
-                    .foregroundStyle(.thinMaterial)
-                HStack{
-                    Image(systemName: "magnifyingglass")
-                        .font(.body)
-                    TextField("Search for a course...", text: $searchText)
-                        .autocorrectionDisabled()
-                        .font(.subheadline)
-                        .frame(maxWidth: 350, maxHeight: 50)
-                        .onSubmit {
-                            searchText = ""
-                            searchIsFocused = false
-                        }
-                        .focused($searchIsFocused)
-                    if !searchText.isEmpty {
-                        Image(systemName: "xmark.circle.fill")
-                            .onTapGesture {
-                                searchText = ""
-                                searchIsFocused = false
-                            }
-                    }
+        .overlay(alignment: .bottomTrailing) {
+            Button{
+                centerOnUserLocation()
+            } label: {
+                ZStack {
+                    Image(systemName: "location")
+                        .frame(width: 44, height: 44)
+                        .font(.system(size: 19.5))
+                        .foregroundColor(.green)
+                        .background(.thickMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .shadow(radius: 4)
                 }
-                .padding()
             }
-            .frame(maxWidth: 350, maxHeight: 50)
+            .padding()
         }
+        
+        //Search Bar
+//        .overlay(alignment: .top) {
+//            ZStack{
+//                RoundedRectangle(cornerRadius: 12)
+//                    .foregroundStyle(.thinMaterial)
+//                HStack{
+//                    Image(systemName: "magnifyingglass")
+//                        .font(.body)
+//                    TextField("Search for a course...", text: $searchText)
+//                        .autocorrectionDisabled()
+//                        .font(.subheadline)
+//                        .frame(maxWidth: 350, maxHeight: 50)
+//                        .onSubmit {
+//                            searchText = ""
+//                            searchIsFocused = false
+//                        }
+//                        .focused($searchIsFocused)
+//                    if !searchText.isEmpty {
+//                        Image(systemName: "xmark.circle.fill")
+//                            .onTapGesture {
+//                                searchText = ""
+//                                searchIsFocused = false
+//                            }
+//                    }
+//                }
+//                .padding()
+//            }
+//            .frame(maxWidth: 350, maxHeight: 50)
+//        }
         .onSubmit {
             if !searchText.isEmpty {
                 SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: searchText)
@@ -179,10 +196,6 @@ struct MapView: View {
                 .shadow(radius: 10)
             }
         }
-        
-        .mapControls {
-            MapUserLocationButton()
-        }
         .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
         //Course Info View Sheet
         .sheet(isPresented: $isShowingDetails, content: {
@@ -196,13 +209,11 @@ struct MapView: View {
     
     // Bottom information panel with course info and search
     private var bottomOverlay: some View {
-        HStack {
-            VStack{
-                // Selected location info if available
-                if let selectedMapItem {
-                    CourseInfoView(selectedMapItem: selectedMapItem, route: route)
-                        .padding()
-                }
+        VStack{
+            // Selected location info if available
+            if let selectedMapItem {
+                CourseInfoView(selectedMapItem: selectedMapItem, route: route)
+                    .padding()
             }
         }
     }
@@ -236,6 +247,19 @@ struct MapView: View {
             let directions = MKDirections(request: request)
             let response = try? await directions.calculate()
             route = response?.routes.first
+        }
+    }
+    
+    // To replace the MapUserLocationButton() map control
+    func centerOnUserLocation() {
+        if let userLocation = locationManager.location?.coordinate {
+            // Animate to user location with zoom level
+            withAnimation {
+                position = .region(MKCoordinateRegion(
+                    center: userLocation,
+                    span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                ))
+            }
         }
     }
 }

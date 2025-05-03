@@ -218,5 +218,5 @@ class UserProfileService {
                 completion(.success(profile))
             }
         }
-    }
+    }    
 }
