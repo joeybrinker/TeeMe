@@ -25,15 +25,20 @@ struct MapView: View {
     @State private var route: MKRoute?
     @State private var locationManager = CLLocationManager()
     @State private var initialSearchPerformed = false
+    @State private var searchText: String = ""
+    @State private var isShowingDetails: Bool = false
     
     //Ease of use
     @State private var timesloaded: Int8 = 0
+    
+    @FocusState private var searchIsFocused: Bool
     
     // MARK: - View Body
     var body: some View {
         // Main map container
         ZStack{
             mainMapContent
+
             // Map event handlers
                 .onMapCameraChange { context in
                     visibleRegion = context.region
@@ -41,8 +46,14 @@ struct MapView: View {
                 .onChange(of: searchResults) { _, _ in
                     position = .automatic
                 }
-                .onChange(of: selectedMapItem) { _, _ in
+                .onChange(of: selectedMapItem) { _, newValue in
                     getDirections()
+                    if newValue != nil {
+                        isShowingDetails = true
+                    }
+                    else {
+                        isShowingDetails = false
+                    }
                 }
                 .onAppear{
                     locationManager.requestWhenInUseAuthorization()
@@ -96,55 +107,115 @@ struct MapView: View {
                     )
             }
         }
-        .mapControls {
-            MapUserLocationButton()
-            MapPitchToggle()
+        .overlay(alignment: .bottomTrailing) {
+            Button{
+                centerOnUserLocation()
+            } label: {
+                ZStack {
+                    Image(systemName: "location")
+                        .frame(width: 44, height: 44)
+                        .font(.system(size: 19.5))
+                        .foregroundColor(.green)
+                        .background(.thickMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .shadow(radius: 4)
+                }
+            }
+            .padding()
+        }
+        
+        //Search Bar
+        .overlay(alignment: .top) {
+            ZStack{
+                RoundedRectangle(cornerRadius: 12)
+                    .foregroundStyle(.thinMaterial)
+                HStack{
+                    Image(systemName: "magnifyingglass")
+                        .font(.body)
+                    TextField("Search for a course...", text: $searchText)
+                        .autocorrectionDisabled()
+                        .font(.subheadline)
+                        .frame(maxWidth: 350, maxHeight: 50)
+                        .onSubmit {
+                            searchText = ""
+                            searchIsFocused = false
+                        }
+                        .focused($searchIsFocused)
+                    if !searchText.isEmpty {
+                        Image(systemName: "xmark.circle.fill")
+                            .onTapGesture {
+                                searchText = ""
+                                searchIsFocused = false
+                            }
+                    }
+                }
+                .padding()
+            }
+            .frame(maxWidth: 350, maxHeight: 50)
+        }
+        .onSubmit {
+            if !searchText.isEmpty {
+                SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: searchText)
+                searchIsFocused = false
+                searchText = ""
+            }
+            else {
+                searchIsFocused = false
+                searchText = ""
+            }
+        }
+        // Search Button
+        .overlay(alignment: .bottom) {
+            Button {
+                route = nil
+                if searchIsFocused {
+                    if !searchText.isEmpty {
+                        SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: searchText)
+                        searchIsFocused = false
+                        searchText = ""
+                    }
+                    else {
+                        searchIsFocused = false
+                        searchText = ""
+                    }
+                }
+                else {
+                    SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "Golf Course")
+                }
+                
+            } label: {
+                ZStack{
+                    RoundedRectangle(cornerRadius: 35)
+                        .frame(width: 128, height: 48)
+                        .foregroundColor(.green)
+                    Text("Search")
+                        .font(.headline.weight(.semibold))
+                        .foregroundColor(.white)
+                }
+                .padding()
+                .shadow(radius: 10)
+            }
         }
         .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
-        .safeAreaInset(edge: .bottom) {
+        //Course Info View Sheet
+        .sheet(isPresented: $isShowingDetails, content: {
             bottomOverlay
-        }
+                .presentationDetents([.height(350)])
+                .presentationBackgroundInteraction(.enabled(upThrough: .height(350)))
+                .presentationCornerRadius(16)
+                .presentationDragIndicator(.visible)
+        })
     }
     
     // Bottom information panel with course info and search
     private var bottomOverlay: some View {
-        HStack {
-            Spacer()
-            VStack(spacing: 10) {
-                
-                // Selected location info if available
-                if let selectedMapItem {
-                    ZStack{
-                        RoundedRectangle(cornerRadius: 10)
-                            .frame(height: 160)
-                            .foregroundStyle(.ultraThinMaterial)
-                        
-                        CourseInfoView(selectedMapItem: selectedMapItem, route: route)
-                            .frame(height: 128)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .padding()
-                    }
-                        
-                }
-                
-                Button {
-                    route = nil
-                    SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "golf course")
-                } label: {
-                    ZStack{
-                        RoundedRectangle(cornerRadius: 35)
-                            .frame(width: 128, height: 48)
-                            .foregroundColor(.green)
-                        Text("Search")
-                            .font(.headline.weight(.semibold))
-                            .foregroundColor(.white)
-                    }
-                    .shadow(radius: 10)
-                }
+        VStack{
+            // Selected location info if available
+            if let selectedMapItem {
+                CourseInfoView(selectedMapItem: selectedMapItem, route: route)
+                    .padding()
             }
-            Spacer()
         }
-        .padding()
     }
     
     // MARK: - Helper Methods
@@ -176,6 +247,19 @@ struct MapView: View {
             let directions = MKDirections(request: request)
             let response = try? await directions.calculate()
             route = response?.routes.first
+        }
+    }
+    
+    // To replace the MapUserLocationButton() map control
+    func centerOnUserLocation() {
+        if let userLocation = locationManager.location?.coordinate {
+            // Animate to user location with zoom level
+            withAnimation {
+                position = .region(MKCoordinateRegion(
+                    center: userLocation,
+                    span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                ))
+            }
         }
     }
 }

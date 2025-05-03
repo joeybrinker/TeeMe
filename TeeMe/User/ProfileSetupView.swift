@@ -141,7 +141,7 @@ struct ProfileSetupView: View {
                     .keyboardType(.default)
                     .autocorrectionDisabled(true)  // Disable autocorrection
                     .padding()
-                    .background(Color(.systemGray6))  // Light gray background
+                    .background(Color(.secondarySystemBackground))  // Light gray background
                     .clipShape(RoundedRectangle.init(cornerRadius: 8))  // Rounded corners
             }
             
@@ -155,7 +155,7 @@ struct ProfileSetupView: View {
                     .textContentType(.name)  // Hint for autofill
                     .keyboardType(.default)
                     .padding()
-                    .background(Color(.systemGray6))  // Light gray background
+                    .background(Color(.secondarySystemBackground))  // Light gray background
                     .clipShape(RoundedRectangle.init(cornerRadius: 8))  // Rounded corners
             }
             
@@ -168,7 +168,7 @@ struct ProfileSetupView: View {
                 TextField("Your name", text: $handicap)  // Bind to handicap state
                     .keyboardType(.default)
                     .padding()
-                    .background(Color(.systemGray6))  // Light gray background
+                    .background(Color(.secondarySystemBackground))  // Light gray background
                     .clipShape(RoundedRectangle.init(cornerRadius: 8))  // Rounded corners
             }
         }
