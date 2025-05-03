@@ -125,34 +125,34 @@ struct MapView: View {
         }
         
         //Search Bar
-//        .overlay(alignment: .top) {
-//            ZStack{
-//                RoundedRectangle(cornerRadius: 12)
-//                    .foregroundStyle(.thinMaterial)
-//                HStack{
-//                    Image(systemName: "magnifyingglass")
-//                        .font(.body)
-//                    TextField("Search for a course...", text: $searchText)
-//                        .autocorrectionDisabled()
-//                        .font(.subheadline)
-//                        .frame(maxWidth: 350, maxHeight: 50)
-//                        .onSubmit {
-//                            searchText = ""
-//                            searchIsFocused = false
-//                        }
-//                        .focused($searchIsFocused)
-//                    if !searchText.isEmpty {
-//                        Image(systemName: "xmark.circle.fill")
-//                            .onTapGesture {
-//                                searchText = ""
-//                                searchIsFocused = false
-//                            }
-//                    }
-//                }
-//                .padding()
-//            }
-//            .frame(maxWidth: 350, maxHeight: 50)
-//        }
+        .overlay(alignment: .top) {
+            ZStack{
+                RoundedRectangle(cornerRadius: 12)
+                    .foregroundStyle(.thinMaterial)
+                HStack{
+                    Image(systemName: "magnifyingglass")
+                        .font(.body)
+                    TextField("Search for a course...", text: $searchText)
+                        .autocorrectionDisabled()
+                        .font(.subheadline)
+                        .frame(maxWidth: 350, maxHeight: 50)
+                        .onSubmit {
+                            searchText = ""
+                            searchIsFocused = false
+                        }
+                        .focused($searchIsFocused)
+                    if !searchText.isEmpty {
+                        Image(systemName: "xmark.circle.fill")
+                            .onTapGesture {
+                                searchText = ""
+                                searchIsFocused = false
+                            }
+                    }
+                }
+                .padding()
+            }
+            .frame(maxWidth: 350, maxHeight: 50)
+        }
         .onSubmit {
             if !searchText.isEmpty {
                 SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: searchText)
