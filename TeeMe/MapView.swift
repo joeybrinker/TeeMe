@@ -28,8 +28,7 @@ struct MapView: View {
     @State private var searchText: String = ""
     @State private var isShowingDetails: Bool = false
     
-    //Ease of use
-    @State private var timesloaded: Int8 = 0
+    @State var timesloaded: Int8 = 0
     
     @FocusState private var searchIsFocused: Bool
     
@@ -38,7 +37,6 @@ struct MapView: View {
         // Main map container
         ZStack{
             mainMapContent
-
             // Map event handlers
                 .onMapCameraChange { context in
                     visibleRegion = context.region
@@ -62,6 +60,7 @@ struct MapView: View {
                         timesloaded += 1
                     }
                 }
+            
             if courseModel.showSignIn {
                 AuthView()
             }
@@ -123,7 +122,6 @@ struct MapView: View {
             }
             .padding()
         }
-        
         //Search Bar
         .overlay(alignment: .top) {
             ZStack{
@@ -188,7 +186,7 @@ struct MapView: View {
                     RoundedRectangle(cornerRadius: 35)
                         .frame(width: 128, height: 48)
                         .foregroundColor(.green)
-                    Text("Search")
+                    Text(searchIsFocused ? "Search" : "Load")
                         .font(.headline.weight(.semibold))
                         .foregroundColor(.white)
                 }
@@ -270,3 +268,4 @@ struct MapView: View {
     MapView()
         .environmentObject(CourseDataModel())
 }
+
