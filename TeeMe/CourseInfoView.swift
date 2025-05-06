@@ -80,13 +80,6 @@ struct CourseInfoView: View {
                             .font(.headline)
                         
                     }
-                    
-                    
-                    
-//                    Text("Name")
-//                    Text("Complete Address")
-//                    Text("Phone Number")
-//                    Text("Travel Time")
                 }
                 .padding()
                 

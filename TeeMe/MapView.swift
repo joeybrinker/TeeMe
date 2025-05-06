@@ -200,7 +200,7 @@ struct MapView: View {
         //Course Info View Sheet
         .sheet(isPresented: $isShowingDetails, content: {
             bottomOverlay
-                .presentationDetents([.height(350)])
+                .presentationDetents([.height(350), .large])
                 .presentationBackgroundInteraction(.enabled(upThrough: .height(350)))
                 .presentationCornerRadius(16)
                 .presentationDragIndicator(.visible)
@@ -215,6 +215,8 @@ struct MapView: View {
                 CourseInfoView(selectedMapItem: selectedMapItem, route: route)
                     .padding()
             }
+            Spacer()
+            Text("Test")
         }
     }
     
