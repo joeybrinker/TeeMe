@@ -26,6 +26,7 @@ struct MapView: View {
     @State private var locationManager = CLLocationManager()
     @State private var initialSearchPerformed = false
     @State private var searchText: String = ""
+    @State private var isShowingInfo: Bool = false
     @State private var isShowingDetails: Bool = false
     
     @State var timesloaded: Int8 = 0
@@ -47,10 +48,11 @@ struct MapView: View {
                 .onChange(of: selectedMapItem) { _, newValue in
                     getDirections()
                     if newValue != nil {
-                        isShowingDetails = true
+                        isShowingInfo = true
                     }
                     else {
-                        isShowingDetails = false
+                        isShowingInfo = false
+                        searchIsFocused = false
                     }
                 }
                 .onAppear{
@@ -116,13 +118,14 @@ struct MapView: View {
         
         
         //Course Info View Sheet
-        .sheet(isPresented: $isShowingDetails, content: {
+        .sheet(isPresented: $isShowingInfo, content: {
             bottomOverlay
                 .presentationDetents([.height(200), .large])
                 .presentationBackgroundInteraction(.enabled(upThrough: .height(200)))
                 .presentationCornerRadius(16)
                 .presentationDragIndicator(.visible)
         })
+        .mapItemDetailSheet(isPresented: $isShowingDetails, item: selectedMapItem)
     }
     
     // Search bar
@@ -213,6 +216,15 @@ struct MapView: View {
             if let selectedMapItem {
                 CourseInfoView(selectedMapItem: selectedMapItem, route: route)
                     .padding()
+            }
+            
+            Button {
+                isShowingInfo = false
+                isShowingDetails = true
+                print("Showing Details")
+            } label: {
+                Text("More Details")
+                    .foregroundStyle(.primary)
             }
         }
     }

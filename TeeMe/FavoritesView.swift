@@ -37,7 +37,7 @@ struct FavoritesView: View {
     private var favoritesList: some View {
         List {
             ForEach(courseModel.favoriteCourses, id: \.self) { course in
-                VStack(alignment: .center) {
+                VStack(alignment: .leading) {
                     Text(course.name ?? "Unknown Course")
                         .font(.headline)
                     

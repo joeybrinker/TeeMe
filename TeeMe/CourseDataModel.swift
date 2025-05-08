@@ -12,8 +12,10 @@ import FirebaseFirestore
 import Contacts
 
 class CourseDataModel: ObservableObject {
+    
     @Published var favoriteCourses: [MKMapItem] = []
     @Published var showSignIn: Bool = false
+    
     private let db = Firestore.firestore()
     
     init() {
@@ -26,7 +28,7 @@ class CourseDataModel: ObservableObject {
     func loadFavoritesFromFirebase(){
         guard let userID = Auth.auth().currentUser?.uid else { return }
         
-        db.collection("users").document(userID).collection("favorites").getDocuments { snapshot, error in
+        db.collection("users").document(userID).collection("favorites").getDocuments { [self] snapshot, error in
             if let error = error {
                 print("Error loading favorites: \(error.localizedDescription)")
                 return
@@ -79,6 +81,7 @@ class CourseDataModel: ObservableObject {
             
                 // Add to favorites array
                 self.favoriteCourses.append(mapItem)
+                                
             }
         }
     }
@@ -168,6 +171,26 @@ class CourseDataModel: ObservableObject {
         }
         else {
             return false
+        }
+    }
+
+    func search(for query: String) {
+        // Set up the search request
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = query
+        request.resultTypes = .pointOfInterest
+        
+        // Use current visible region or default to a region near the default position
+        request.region = MKCoordinateRegion(
+            center: CLLocationManager().location?.coordinate ?? .defaultPosition,
+            span: MKCoordinateSpan(latitudeDelta: .infinity, longitudeDelta: .infinity)
+        )
+        
+        // Perform search asynchronously
+        Task {
+            let search = MKLocalSearch(request: request)
+            let response = try? await search.start()
+            //searchResults = response?.mapItems ?? []
         }
     }
 }
