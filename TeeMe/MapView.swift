@@ -226,6 +226,8 @@ struct MapView: View {
                 Text("More Details")
                     .foregroundStyle(.primary)
             }
+            
+            Spacer()
         }
     }
     

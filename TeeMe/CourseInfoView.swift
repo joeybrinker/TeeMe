@@ -60,6 +60,7 @@ struct CourseInfoView: View {
             if let name = selectedMapItem?.name {
                 Text(name)
                     .font(.title)
+                    .padding()
             }
             //
             //                    // Address if available
@@ -75,12 +76,11 @@ struct CourseInfoView: View {
             //
             //                    }
             //
-            //                    // Travel time if available
-            //                    if let time = travelTime {
-            //                        Text("Travel time: \(time)")
-            //                            .font(.headline)
-            //
-            //                    }
+            // Travel time if available
+            if let time = travelTime {
+                Text("Travel time: \(time)")
+                    .font(.headline)
+            }
             
             // Favorite button - updated to use the course model
             HStack{
