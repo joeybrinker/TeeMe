@@ -53,46 +53,42 @@ struct CourseInfoView: View {
     
     // Information overlay showing name and travel time
     private var overlayContent: some View {
-        VStack{
-            HStack {
-                VStack(alignment: .leading, spacing: 5) {
-                    // Location name
-                    if let name = selectedMapItem?.name {
-                        Text(name)
-                    }
-                    
-                    // Address if available
-                    if let address = selectedMapItem?.placemark.postalAddress {
-                        let completeAddress = "\(address.street), \(address.city), \(address.state)"
-                        Text(completeAddress)
-                        
-                    }
-                    
-                    // Phone number if available
-                    if let phoneNumber = selectedMapItem?.phoneNumber {
-                        Text(phoneNumber)
-                        
-                    }
-                    
-                    // Travel time if available
-                    if let time = travelTime {
-                        Text("Travel time: \(time)")
-                            .font(.headline)
-                        
-                    }
-                    
-                    
-                    
-//                    Text("Name")
-//                    Text("Complete Address")
-//                    Text("Phone Number")
-//                    Text("Travel Time")
-                }
-                .padding()
+        //        VStack{
+        //            HStack {
+        VStack(alignment: .center, spacing: 5) {
+            // Location name
+            if let name = selectedMapItem?.name {
+                Text(name)
+                    .font(.title)
+                    .padding()
+            }
+            //
+            //                    // Address if available
+            //                    if let address = selectedMapItem?.placemark.postalAddress {
+            //                        let completeAddress = "\(address.street), \(address.city), \(address.state)"
+            //                        Text(completeAddress)
+            //
+            //                    }
+            //
+            //                    // Phone number if available
+            //                    if let phoneNumber = selectedMapItem?.phoneNumber {
+            //                        Text(phoneNumber)
+            //
+            //                    }
+            //
+            // Travel time if available
+            if let time = travelTime {
+                Text("Travel time: \(time)")
+                    .font(.headline)
+            }
+            
+            // Favorite button - updated to use the course model
+            HStack{
+                
+                Text(isFavorited ? "Remove from favorites" : "Add to favorites")
                 
                 Spacer()
                 
-                // Favorite button - updated to use the course model
                 Button {
                     if Auth.auth().currentUser != nil{
                         if let selectedCourse = selectedMapItem {
@@ -110,26 +106,28 @@ struct CourseInfoView: View {
                 }
                 .font(.title3)
             }
-            .padding(.horizontal)
-            
-            if let scene = lookAroundScene {
-                LookAroundPreview(initialScene: scene)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .frame(width: 350, height: 175)
-            }
-            else {
-                ContentUnavailableView("No preview available", systemImage: "eye.slash")
-                    .frame(width: 350, height: 175)
-            }
-        }
-        .onAppear {
-            fetchLookAroundPreview()
-        }
-        .onChange(of: selectedMapItem) { _, _ in
-            fetchLookAroundPreview()
+            .padding()
         }
     }
-}
+//
+//            if let scene = lookAroundScene {
+//                LookAroundPreview(initialScene: scene)
+//                    .clipShape(RoundedRectangle(cornerRadius: 12))
+//                    .frame(width: 350, height: 175)
+//            }
+//            else {
+//                ContentUnavailableView("No preview available", systemImage: "eye.slash")
+//                    .frame(width: 350, height: 175)
+//            }
+        }
+//        .onAppear {
+//            fetchLookAroundPreview()
+//        }
+//        .onChange(of: selectedMapItem) { _, _ in
+//            fetchLookAroundPreview()
+//        }
+//    }
+//}
 
 extension CourseInfoView {
     func fetchLookAroundPreview() {

@@ -26,10 +26,10 @@ struct MapView: View {
     @State private var locationManager = CLLocationManager()
     @State private var initialSearchPerformed = false
     @State private var searchText: String = ""
+    @State private var isShowingInfo: Bool = false
     @State private var isShowingDetails: Bool = false
     
-    //Ease of use
-    @State private var timesloaded: Int8 = 0
+    @State var timesloaded: Int8 = 0
     
     @FocusState private var searchIsFocused: Bool
     
@@ -38,7 +38,6 @@ struct MapView: View {
         // Main map container
         ZStack{
             mainMapContent
-
             // Map event handlers
                 .onMapCameraChange { context in
                     visibleRegion = context.region
@@ -49,10 +48,11 @@ struct MapView: View {
                 .onChange(of: selectedMapItem) { _, newValue in
                     getDirections()
                     if newValue != nil {
-                        isShowingDetails = true
+                        isShowingInfo = true
                     }
                     else {
-                        isShowingDetails = false
+                        isShowingInfo = false
+                        searchIsFocused = false
                     }
                 }
                 .onAppear{
@@ -62,6 +62,7 @@ struct MapView: View {
                         timesloaded += 1
                     }
                 }
+            
             if courseModel.showSignIn {
                 AuthView()
             }
@@ -86,72 +87,21 @@ struct MapView: View {
             if let route {
                 // Create a wider, blurred line for the glow effect
                 MapPolyline(route.polyline)
-                    .stroke(
-                        Color.green.opacity(0.5),
-                        style: StrokeStyle(
-                            lineWidth: 8,
-                            lineCap: .round,
-                            lineJoin: .round
-                        )
-                    )
+                    .stroke( Color.green.opacity(0.5), style: StrokeStyle( lineWidth: 8, lineCap: .round, lineJoin: .round))
                 
                 // Main route line with a gradient
                 MapPolyline(route.polyline)
-                    .stroke(
-                        .green,
-                        style: StrokeStyle(
-                            lineWidth: 4,
-                            lineCap: .round,
-                            lineJoin: .round
-                        )
-                    )
+                    .stroke(.green, style: StrokeStyle(lineWidth: 4,lineCap: .round,lineJoin: .round))
             }
         }
         .overlay(alignment: .bottomTrailing) {
-            Button{
-                centerOnUserLocation()
-            } label: {
-                ZStack {
-                    Image(systemName: "location")
-                        .frame(width: 44, height: 44)
-                        .font(.system(size: 19.5))
-                        .foregroundColor(.green)
-                        .background(.thickMaterial)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .shadow(radius: 4)
-                }
-            }
-            .padding()
+            centerUserLocationButton
         }
-        
-        //Search Bar
         .overlay(alignment: .top) {
-            ZStack{
-                RoundedRectangle(cornerRadius: 12)
-                    .foregroundStyle(.thinMaterial)
-                HStack{
-                    Image(systemName: "magnifyingglass")
-                        .font(.body)
-                    TextField("Search for a course...", text: $searchText)
-                        .autocorrectionDisabled()
-                        .font(.subheadline)
-                        .frame(maxWidth: 350, maxHeight: 50)
-                        .onSubmit {
-                            searchText = ""
-                            searchIsFocused = false
-                        }
-                        .focused($searchIsFocused)
-                    if !searchText.isEmpty {
-                        Image(systemName: "xmark.circle.fill")
-                            .onTapGesture {
-                                searchText = ""
-                                searchIsFocused = false
-                            }
-                    }
-                }
-                .padding()
-            }
-            .frame(maxWidth: 350, maxHeight: 50)
+            searchBar
+        }
+        .overlay(alignment: .bottom) {
+            searchButton
         }
         .onSubmit {
             if !searchText.isEmpty {
@@ -164,47 +114,99 @@ struct MapView: View {
                 searchText = ""
             }
         }
-        // Search Button
-        .overlay(alignment: .bottom) {
-            Button {
-                route = nil
-                if searchIsFocused {
-                    if !searchText.isEmpty {
-                        SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: searchText)
-                        searchIsFocused = false
-                        searchText = ""
-                    }
-                    else {
-                        searchIsFocused = false
-                        searchText = ""
-                    }
-                }
-                else {
-                    SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "Golf Course")
-                }
-                
-            } label: {
-                ZStack{
-                    RoundedRectangle(cornerRadius: 35)
-                        .frame(width: 128, height: 48)
-                        .foregroundColor(.green)
-                    Text("Search")
-                        .font(.headline.weight(.semibold))
-                        .foregroundColor(.white)
-                }
-                .padding()
-                .shadow(radius: 10)
-            }
-        }
         .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
+        
+        
         //Course Info View Sheet
-        .sheet(isPresented: $isShowingDetails, content: {
+        .sheet(isPresented: $isShowingInfo, content: {
             bottomOverlay
-                .presentationDetents([.height(350)])
-                .presentationBackgroundInteraction(.enabled(upThrough: .height(350)))
+                .presentationDetents([.height(200), .large])
+                .presentationBackgroundInteraction(.enabled(upThrough: .height(200)))
                 .presentationCornerRadius(16)
                 .presentationDragIndicator(.visible)
         })
+        .mapItemDetailSheet(isPresented: $isShowingDetails, item: selectedMapItem)
+    }
+    
+    // Search bar
+    private var searchBar: some View {
+        ZStack{
+            RoundedRectangle(cornerRadius: 12)
+                .foregroundStyle(.thinMaterial)
+            HStack{
+                Image(systemName: "magnifyingglass")
+                    .font(.body)
+                TextField("Search for a course...", text: $searchText)
+                    .autocorrectionDisabled()
+                    .font(.subheadline)
+                    .frame(maxWidth: 350, maxHeight: 50)
+                    .onSubmit {
+                        searchText = ""
+                        searchIsFocused = false
+                    }
+                    .focused($searchIsFocused)
+                if !searchText.isEmpty {
+                    Image(systemName: "xmark.circle.fill")
+                        .onTapGesture {
+                            searchText = ""
+                            searchIsFocused = false
+                        }
+                }
+            }
+            .padding()
+        }
+        .frame(maxWidth: 350, maxHeight: 50)
+    }
+    
+    // Center user location button
+    private var centerUserLocationButton: some View {
+        Button{
+            centerOnUserLocation()
+        } label: {
+            ZStack {
+                Image(systemName: "location")
+                    .frame(width: 44, height: 44)
+                    .font(.system(size: 19.5))
+                    .foregroundColor(.green)
+                    .background(.thickMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .shadow(radius: 4)
+            }
+        }
+        .padding()
+    }
+    
+    // Search / load button
+    private var searchButton: some View {
+        Button {
+            route = nil
+            if searchIsFocused {
+                if !searchText.isEmpty {
+                    SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: searchText)
+                    searchIsFocused = false
+                    searchText = ""
+                }
+                else {
+                    searchIsFocused = false
+                    searchText = ""
+                }
+            }
+            else {
+                SearchModel(searchResults: $searchResults, visibleRegion: visibleRegion).search(for: "Golf Course")
+            }
+            
+        } label: {
+            ZStack{
+                RoundedRectangle(cornerRadius: 35)
+                    .frame(width: 128, height: 48)
+                    .foregroundColor(.green)
+                Text(searchIsFocused ? "Search" : "Load")
+                    .font(.headline.weight(.semibold))
+                    .foregroundColor(.white)
+            }
+            .padding()
+            .shadow(radius: 10)
+        }
     }
     
     // Bottom information panel with course info and search
@@ -215,6 +217,17 @@ struct MapView: View {
                 CourseInfoView(selectedMapItem: selectedMapItem, route: route)
                     .padding()
             }
+            
+            Button {
+                isShowingInfo = false
+                isShowingDetails = true
+                print("Showing Details")
+            } label: {
+                Text("More Details")
+                    .foregroundStyle(.primary)
+            }
+            
+            Spacer()
         }
     }
     
@@ -268,3 +281,4 @@ struct MapView: View {
     MapView()
         .environmentObject(CourseDataModel())
 }
+
