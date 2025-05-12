@@ -25,6 +25,10 @@ struct CourseInfoView: View {
     // Favorite state
     @State private var isFavorited: Bool = false
     
+    // Weather
+    @StateObject private var weatherManager = WeatherKitManager()
+
+    
     // MARK: - Computed Properties
     
     // Formatted travel time for the route
@@ -45,6 +49,7 @@ struct CourseInfoView: View {
                 // Set initial favorite state when view appears
                 if let course = selectedMapItem {
                     isFavorited = courseModel.isFavorite(courseName: course.placemark.name ?? "")
+                    weatherManager.fetchWeather(for: CLLocation(latitude: selectedMapItem?.placemark.coordinate.latitude ?? 0, longitude: selectedMapItem?.placemark.coordinate.longitude ?? 0))
                 }
             }
     }
@@ -81,6 +86,13 @@ struct CourseInfoView: View {
                 Text("Travel time: \(time)")
                     .font(.headline)
             }
+            else {
+                Text("Travel time: ")
+            }
+            
+            Label(weatherManager.temperature, systemImage: weatherManager.symbolName)
+            
+            
             
             // Favorite button - updated to use the course model
             HStack{
