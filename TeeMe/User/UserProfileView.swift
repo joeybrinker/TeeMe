@@ -73,7 +73,7 @@ struct UserProfileView: View {
                     // Only show Edit button if user is authenticated and has a profile
                     if !viewModel.currentUser.id.isEmpty && Auth.auth().currentUser != nil {
                         ToolbarItem(placement: .navigationBarTrailing) {
-                            Button("Edit") {
+                            Button("Settings") {
                                 showingEditProfile = true  // Toggle profile edit sheet
                             }
                         }

@@ -26,6 +26,8 @@ struct ProfileSetupView: View {
     
     // Environment objects and values
     @EnvironmentObject var courseModel: CourseDataModel  // Course data injected from parent
+    @StateObject private var weatherManager = WeatherKitManager()
+    
     @Environment(\.dismiss) var dismiss  // Environment value to dismiss this view
     
     // MARK: - Body
