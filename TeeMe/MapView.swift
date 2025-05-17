@@ -215,7 +215,6 @@ struct MapView: View {
             // Selected location info if available
             if let selectedMapItem {
                 CourseInfoView(selectedMapItem: selectedMapItem, route: route)
-                    //.padding()
             }
             
             Button {
