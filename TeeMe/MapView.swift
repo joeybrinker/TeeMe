@@ -30,7 +30,7 @@ struct MapView: View {
     @State private var isShowingDetails: Bool = false
     
     @State var timesloaded: Int8 = 0
-    
+        
     @FocusState private var searchIsFocused: Bool
     
     // MARK: - View Body
@@ -125,7 +125,7 @@ struct MapView: View {
                 .presentationCornerRadius(16)
                 .presentationDragIndicator(.visible)
         })
-        .mapItemDetailSheet(isPresented: $isShowingDetails, item: selectedMapItem)
+        .mapItemDetailPopover(isPresented: $isShowingDetails, item: selectedMapItem)
     }
     
     // Search bar
@@ -215,7 +215,6 @@ struct MapView: View {
             // Selected location info if available
             if let selectedMapItem {
                 CourseInfoView(selectedMapItem: selectedMapItem, route: route)
-                    .padding()
             }
             
             Button {

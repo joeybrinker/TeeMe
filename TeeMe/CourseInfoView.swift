@@ -25,6 +25,10 @@ struct CourseInfoView: View {
     // Favorite state
     @State private var isFavorited: Bool = false
     
+    // Weather
+    @StateObject private var weatherManager = WeatherKitManager()
+    
+    
     // MARK: - Computed Properties
     
     // Formatted travel time for the route
@@ -45,6 +49,7 @@ struct CourseInfoView: View {
                 // Set initial favorite state when view appears
                 if let course = selectedMapItem {
                     isFavorited = courseModel.isFavorite(courseName: course.placemark.name ?? "")
+                    weatherManager.fetchWeather(for: CLLocation(latitude: selectedMapItem?.placemark.coordinate.latitude ?? 0, longitude: selectedMapItem?.placemark.coordinate.longitude ?? 0))
                 }
             }
     }
@@ -61,30 +66,28 @@ struct CourseInfoView: View {
                 Text(name)
                     .font(.title)
                     .padding()
+                    .lineLimit(1)
+                    .allowsTightening(true)
             }
-            //
-            //                    // Address if available
-            //                    if let address = selectedMapItem?.placemark.postalAddress {
-            //                        let completeAddress = "\(address.street), \(address.city), \(address.state)"
-            //                        Text(completeAddress)
-            //
-            //                    }
-            //
-            //                    // Phone number if available
-            //                    if let phoneNumber = selectedMapItem?.phoneNumber {
-            //                        Text(phoneNumber)
-            //
-            //                    }
-            //
-            // Travel time if available
-            if let time = travelTime {
-                Text("Travel time: \(time)")
-                    .font(.headline)
+            
+            
+            HStack {
+                // Travel time if available
+                if let time = travelTime {
+                    Text("Travel time: \(time)")
+                }
+                else {
+                    Text("Travel time: ")
+                }
+                
+                Spacer()
+                
+                Label(weatherManager.temperature, systemImage: weatherManager.symbolName)
             }
+            .padding(.horizontal)
             
             // Favorite button - updated to use the course model
             HStack{
-                
                 Text(isFavorited ? "Remove from favorites" : "Add to favorites")
                 
                 Spacer()
@@ -107,36 +110,6 @@ struct CourseInfoView: View {
                 .font(.title3)
             }
             .padding()
-        }
-    }
-//
-//            if let scene = lookAroundScene {
-//                LookAroundPreview(initialScene: scene)
-//                    .clipShape(RoundedRectangle(cornerRadius: 12))
-//                    .frame(width: 350, height: 175)
-//            }
-//            else {
-//                ContentUnavailableView("No preview available", systemImage: "eye.slash")
-//                    .frame(width: 350, height: 175)
-//            }
-        }
-//        .onAppear {
-//            fetchLookAroundPreview()
-//        }
-//        .onChange(of: selectedMapItem) { _, _ in
-//            fetchLookAroundPreview()
-//        }
-//    }
-//}
-
-extension CourseInfoView {
-    func fetchLookAroundPreview() {
-        if let selectedMapItem {
-            lookAroundScene = nil
-            Task {
-                let request = MKLookAroundSceneRequest(mapItem: selectedMapItem)
-                lookAroundScene = try? await request.scene
-            }
         }
     }
 }
