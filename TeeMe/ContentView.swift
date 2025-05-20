@@ -36,9 +36,6 @@ struct ContentView: View {
                     .tag(2)
             }
             .accentColor(.green) //Will be depreciated in later versions
-            .onAppear{
-                courseModel.loadFavoritesFromFirebase()
-            }
     }
 }
 

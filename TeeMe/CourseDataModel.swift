@@ -25,10 +25,13 @@ class CourseDataModel: ObservableObject {
     // MARK: - Firebase Functions
     
     // Load favorites from firebase
-    func loadFavoritesFromFirebase(){
+    func loadFavoritesFromFirebase() {
         guard let userID = Auth.auth().currentUser?.uid else { return }
         
-        db.collection("users").document(userID).collection("favorites").getDocuments { [self] snapshot, error in
+        db.collection("users").document(userID).collection("favorites").getDocuments { [weak self] snapshot, error in
+            // MARK: - CHANGE: Added weak self to prevent memory leaks
+            guard let self = self else { return }
+            
             if let error = error {
                 print("Error loading favorites: \(error.localizedDescription)")
                 return
@@ -43,78 +46,53 @@ class CourseDataModel: ObservableObject {
             for document in documents {
                 let data = document.data()
                 
-                // Get location by coordinates
+                // MARK: - CHANGE: Only extract minimal required fields
                 guard let latitude = data["latitude"] as? Double,
                       let longitude = data["longitude"] as? Double,
                       let name = data["name"] as? String else { continue }
                 
-                // create address for the mapItem
-                var addressDictionary: [String: Any] = [:]
-                
-                if let street = data["street"] as? String {
-                    addressDictionary[CNPostalAddressStreetKey] = street
-                }
-                if let city = data["city"] as? String {
-                    addressDictionary[CNPostalAddressCityKey] = city
-                }
-                if let state = data["state"] as? String {
-                    addressDictionary[CNPostalAddressStateKey] = state
-                }
-                if let postalCode = data["postalCode"] as? String {
-                    addressDictionary[CNPostalAddressPostalCodeKey] = postalCode
-                }
-                
-                
-                // Create mapItem & placemark
+                // Create temporary placeholder MapItem
                 let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-                let placemark = MKPlacemark(coordinate: coordinate, addressDictionary: addressDictionary)
-                let mapItem = MKMapItem(placemark: placemark)
-                mapItem.name = name
+                let placemark = MKPlacemark(coordinate: coordinate)
+                let tempMapItem = MKMapItem(placemark: placemark)
+                tempMapItem.name = name
                 
-                // Other properties if available
-                if let phoneNumber = data["phoneNumber"] as? String {
-                    mapItem.phoneNumber = phoneNumber
+                // MARK: - CHANGE: Immediately start async search for the real item
+                Task {
+                    if let originalItem = await self.findOriginalMapItem(
+                        withName: name,
+                        coordinate: coordinate
+                    ) {
+                        // Add the found original item to favorites
+                        await MainActor.run {
+                            self.favoriteCourses.append(originalItem)
+                        }
+                    } else {
+                        // Fallback: Use the minimal reconstructed item if no original found
+                        await MainActor.run {
+                            self.favoriteCourses.append(tempMapItem)
+                        }
+                    }
                 }
-                if let websiteString = data["website"] as? String, let url = URL(string: websiteString) {
-                    mapItem.url = url
-                }
-            
-                // Add to favorites array
-                self.favoriteCourses.append(mapItem)
-                                
             }
         }
     }
     
-    // Save to Firebase
+    // MARK: - CHANGE: Simplified save method with minimal data
     private func saveToFirebase(_ course: MKMapItem) {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         
-        // Create a document ID from course's unique identifier or generate one
+        // Create a document ID from course coordinates
         let lat = course.placemark.coordinate.latitude
         let long = course.placemark.coordinate.longitude
         let documentId = "\(lat)_\(long)".replacingOccurrences(of: ".", with: "_")
         
-        // Create a dictionary with course data
-        var courseData: [String: Any] = [
+        // MARK: - CHANGE: Store only the minimal required fields
+        let courseData: [String: Any] = [
             "name": course.name ?? "Unknown Course",
             "latitude": lat,
-            "longitude": long,
-            ]
-        
-        // Other properties if available
-        if let phoneNumber = course.phoneNumber {
-            courseData["phoneNumber"] = phoneNumber
-        }
-        if let website = course.url {
-            courseData["website"] = website.absoluteString
-        }
-        if let postalAddress = course.placemark.postalAddress {
-            courseData["street"] = postalAddress.street
-            courseData["city"] = postalAddress.city
-            courseData["state"] = postalAddress.state
-            courseData["postalCode"] = postalAddress.postalCode
-        }
+            "longitude": long
+        ]
         
         // Save to firestore
         db.collection("users").document(userId).collection("favorites").document(documentId).setData(courseData) {
@@ -149,9 +127,53 @@ class CourseDataModel: ObservableObject {
     
     // MARK: - MapItem Functions
     
+    // MARK: - CHANGE: Optimized search function that only needs name and coordinates
+    func findOriginalMapItem(withName name: String, coordinate: CLLocationCoordinate2D) async -> MKMapItem? {
+        let searchRequest = MKLocalSearch.Request()
+        
+        // Use the name as the search query - essential for finding the original item
+        searchRequest.naturalLanguageQuery = name
+        
+        // Use a small region centered on the saved coordinates to narrow results
+        searchRequest.region = MKCoordinateRegion(
+            center: coordinate,
+            span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+        )
+        
+        do {
+            let search = MKLocalSearch(request: searchRequest)
+            let response = try await search.start()
+            
+            // Find a matching item by comparing coordinates and name
+            return response.mapItems.first { item in
+                let itemCoord = item.placemark.coordinate
+                let distance = CLLocation(latitude: itemCoord.latitude, longitude: itemCoord.longitude)
+                    .distance(from: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude))
+                
+                // Match if distance is less than 50 meters and names match
+                // Using a slightly larger distance for better matches
+                print("Search Worked")
+                return distance < 50 && item.name == name
+                
+            }
+        } catch {
+            print("Search failed: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    // MARK: - CHANGE: Updated to use the correct identifier in toggleFavorite
     func toggleFavorite(for course: MKMapItem) -> Bool {
-        // Unfavorite Course and Return False
-        if let index = favoriteCourses.firstIndex(of: course){
+        // Check if this course is already a favorite by comparing coordinates
+        let courseCoord = course.placemark.coordinate
+        if let index = favoriteCourses.firstIndex(where: { favoriteItem in
+            let favoriteCoord = favoriteItem.placemark.coordinate
+            let distance = CLLocation(latitude: courseCoord.latitude, longitude: courseCoord.longitude)
+                .distance(from: CLLocation(latitude: favoriteCoord.latitude, longitude: favoriteCoord.longitude))
+            
+            return distance < 10 && favoriteItem.name == course.name
+        }) {
+            // Unfavorite Course and Return False
             self.favoriteCourses.remove(at: index)
             removeFromFirebase(course)
             return false
@@ -164,13 +186,21 @@ class CourseDataModel: ObservableObject {
         }
     }
     
-    // Returns true if favorite, false otherwise
+    // MARK: - CHANGE: Updated favorite check methods to use coordinate comparison
     func isFavorite(courseName: String) -> Bool {
-        if favoriteCourses.contains(where: { $0.name == courseName }) {
-            return true
-        }
-        else {
-            return false
+        return favoriteCourses.contains(where: { $0.name == courseName })
+    }
+    
+    func isFavorite(course: MKMapItem) -> Bool {
+        let courseCoord = course.placemark.coordinate
+        
+        return favoriteCourses.contains { favoriteItem in
+            let favoriteCoord = favoriteItem.placemark.coordinate
+            let distance = CLLocation(latitude: courseCoord.latitude, longitude: courseCoord.longitude)
+                .distance(from: CLLocation(latitude: favoriteCoord.latitude, longitude: favoriteCoord.longitude))
+            
+            // Consider it the same course if they're within 10 meters and have the same name
+            return distance < 10 && favoriteItem.name == course.name
         }
     }
 
@@ -189,9 +219,7 @@ class CourseDataModel: ObservableObject {
         // Perform search asynchronously
         Task {
             let search = MKLocalSearch(request: request)
-            let response = try? await search.start()
-            //searchResults = response?.mapItems ?? []
+            _ = try? await search.start()
         }
     }
 }
-

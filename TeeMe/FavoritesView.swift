@@ -62,11 +62,7 @@ struct FavoritesView: View {
                 }
             }
         }
-        .sheet(item: $selectedCourse) { course in
-            CourseDetailView(course: course)
-                .presentationDragIndicator(.visible)
-                .presentationCornerRadius(40)
-        }
+        .mapItemDetailSheet(item: $selectedCourse)
     }
 }
 
@@ -74,60 +70,6 @@ struct FavoritesView: View {
 extension MKMapItem: @retroactive Identifiable {
     public var id: String {
         return self.placemark.title ?? UUID().uuidString
-    }
-}
-
-// Course detail sheet view
-struct CourseDetailView: View {
-    let course: MKMapItem
-    @Environment(\.dismiss) var dismiss
-    
-    var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                Text(course.name ?? "Unknown Course")
-                    .font(.title)
-                    .fontWeight(.bold)
-                
-                if let address = course.placemark.postalAddress {
-                    VStack(alignment: .leading) {
-                        Text("Address")
-                            .font(.headline)
-                        Text("\(address.street)")
-                        Text("\(address.city), \(address.state) \(address.postalCode)")
-                    }
-                }
-                
-                if let phone = course.phoneNumber {
-                    VStack(alignment: .leading) {
-                        Text("Phone")
-                            .font(.headline)
-                        //Text(phone)
-                        Link(phone, destination: URL(string: "tel://\(phone)")!)
-                    }
-                }
-                
-                if let url = course.url {
-                    VStack(alignment: .leading) {
-                        Text("Website")
-                            .font(.headline)
-                        Link(url.absoluteString, destination: url)
-                    }
-                }
-                
-                Spacer()
-            }
-            .padding()
-            .navigationTitle("Course Details")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
-        }
     }
 }
 
