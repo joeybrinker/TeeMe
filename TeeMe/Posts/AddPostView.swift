@@ -93,9 +93,8 @@ struct AddPostView: View {
     }
     
     var likeButton: some View {
-        
         Image(systemName: "hand.thumbsup.fill")
-            .foregroundStyle(.gray.opacity(0.35))
+            .foregroundStyle(.gray.opacity(0))
     }
     
     var mainContent: some View {
