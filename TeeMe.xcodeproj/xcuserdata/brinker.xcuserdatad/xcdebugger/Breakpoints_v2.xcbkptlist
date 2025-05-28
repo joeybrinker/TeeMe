@@ -20,5 +20,21 @@
             landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "5D4AF420-8EE1-4EDF-9A71-0DECF8677D2F"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../../../../var/folders/dc/9jrz4tjj2yx_44ysgc8065fw0000gp/T/swift-generated-sources/@__swiftmacro_5TeeMe0019PostViewswift_DJEEdfMX109_0_33_BF28FAEE6953258B7E9FDCFBC0AA811CLl7PreviewfMf_.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1"
+            endingLineNumber = "1"
+            landmarkName = "$s5TeeMe0019PostViewswift_DJEEdfMX109_0_33_BF28FAEE6953258B7E9FDCFBC0AA811CLl7PreviewfMf_15PreviewRegistryfMu_"
+            landmarkType = "37">
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

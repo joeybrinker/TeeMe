@@ -11,6 +11,7 @@ import FirebaseAuth
 struct ContentView: View {
     @State private var selectedTab = 0
     @EnvironmentObject var courseModel: CourseDataModel
+    @EnvironmentObject var userProfileViewModel: UserProfileViewModel
     
     var body: some View {
             TabView(selection: $selectedTab) {
@@ -34,6 +35,13 @@ struct ContentView: View {
                         Label("Profile", systemImage: "person")
                     }
                     .tag(2)
+                
+                FeedView()
+                    .environmentObject(userProfileViewModel)
+                    .tabItem {
+                        Label("Feed", systemImage: "note.text")
+                    }
+                    .tag(3)
             }
             .accentColor(.green) //Will be depreciated in later versions
     }
@@ -42,4 +50,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environmentObject(CourseDataModel())
+        .environmentObject(UserProfileViewModel())
 }
