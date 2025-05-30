@@ -23,6 +23,7 @@ struct FeedView: View {
                         }
                     }
                 }
+                .scrollIndicators(.automatic)
                 .navigationTitle(Text("Feed"))
                 .toolbar {
                     ToolbarItem {

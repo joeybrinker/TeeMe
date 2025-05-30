@@ -16,8 +16,11 @@ struct AddPostView: View {
     @State private var score = ""
     @State private var holes = ""
     @State private var greensInRegulation = ""
-    
     @State private var showError: Bool = false
+    
+    var conditionCheck: Bool {
+        Int(score) ?? 0 < 1000 && Int(holes) ?? 0 < 19 && Int(greensInRegulation) ?? 0 < 19 && Int(score) ?? 0 > 0 && Int(holes) ?? 0 > 0 && Int(greensInRegulation) ?? 0 > 0
+    }
     
     var body: some View {
         ZStack{
@@ -48,7 +51,7 @@ struct AddPostView: View {
         
         Button {
             if checkCases() {
-                postVM.addPost(Post(user: userViewModel.currentUser,title: title, score: score, holes: holes, greensInRegulation: greensInRegulation))
+                postVM.addPost(Post(user: userViewModel.currentUser,title: title, score: score, holes: holes, greensInRegulation: greensInRegulation, datePosted: "\(Date().formatted(date: .numeric, time: .shortened))"))
             }
             else {
                 showError = true
@@ -156,7 +159,7 @@ struct AddPostView: View {
                     return false
                 }
             }
-            if Int(score) ?? 0 < 1000 && Int(holes) ?? 0 < 19 && Int(greensInRegulation) ?? 0 < 19{
+            if conditionCheck {
                 return true
             } else {
                 return false
@@ -184,7 +187,7 @@ struct AddPostView: View {
                     return "Must enter a number for Greens In Regulation"
                 }
             }
-            if Int(score) ?? 0 < 1000 && Int(holes) ?? 0 < 19 && Int(greensInRegulation) ?? 0 < 19{
+            if conditionCheck {
                 return ""
             } else {
                 return "Must be a reasonable number"

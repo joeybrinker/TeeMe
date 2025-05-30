@@ -11,22 +11,29 @@ import SwiftUI
 class Post: ObservableObject, Hashable {
     
     let id: UUID = UUID()
+    let datePosted: String
     let user: UserProfileModel
     let title: String
     let score: String
     let holes: String
     let greensInRegulation: String
-    //let yardage: String
-    
-    @Published var likes: Int = 0
     var isLiked: Bool = false
     
-    init(user: UserProfileModel, title: String, score: String, holes: String, greensInRegulation: String) {
+    @Published var likes: Int = 0
+    
+    init(user: UserProfileModel, title: String, score: String, holes: String, greensInRegulation: String, datePosted: String? = nil) {
         self.user = user
         self.title = title
         self.score = score
         self.holes = holes
         self.greensInRegulation = greensInRegulation
+        
+        // Use provided date or generate current date
+        if let datePosted = datePosted {
+            self.datePosted = datePosted
+        } else {
+            self.datePosted = "\(Date().formatted(date: .numeric, time: .shortened))"
+        }
     }
     
     func likePost() {

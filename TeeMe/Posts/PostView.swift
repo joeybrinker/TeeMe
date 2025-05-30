@@ -14,7 +14,7 @@ struct PostView: View {
     var body: some View {
         ZStack{
             RoundedRectangle(cornerRadius: 20)
-                .foregroundStyle(.gray.opacity(0.15))
+                .foregroundStyle(.gray.opacity(0.20))
             VStack(spacing: 0) {
                 postHeader
                     .padding(.top)
@@ -29,11 +29,15 @@ struct PostView: View {
                 
                 Spacer()
                 
-                HStack {
+                HStack(spacing: 4) {
                     likeButton
-                        .padding()
+                        .padding(.leading)
+                        
+                    Text("\(post.likes)")
+                        .font(.caption.weight(.medium))
                     Spacer()
                 }
+                .padding(.bottom)
             }
         }
         .frame(width: 325, height: 200)
@@ -43,13 +47,15 @@ struct PostView: View {
         HStack{
             Text(post.user.displayName)
                 .font(.headline.weight(.bold))
-                .frame(height: 16)
-                .lineLimit(1)
-                .allowsTightening(true)
-                .minimumScaleFactor(0.25)
-                .padding(.horizontal)
             Spacer()
+            Text(post.datePosted)
+                .font(.caption.weight(.thin))
         }
+        .frame(height: 16)
+        .lineLimit(1)
+        .allowsTightening(true)
+        .minimumScaleFactor(0.25)
+        .padding(.horizontal)
     }
     
     var courseName: some View {
@@ -72,7 +78,7 @@ struct PostView: View {
         } label: {
             ZStack{
                 Image(systemName: "hand.thumbsup.fill")
-                    .foregroundStyle(post.isLiked ? .green : .gray.opacity(0.35))
+                    .foregroundStyle(post.isLiked ? .green : .gray.opacity(0.50))
             }
         }
     }
@@ -121,5 +127,5 @@ struct PostView: View {
 }
 
 #Preview {
-    PostView(post: Post(user: UserProfileModel(id: "firebaseID", username: "username", displayName: "displayname", dateJoined: Date()) ,title: "Detroit Golf Club", score: "72", holes: "18", greensInRegulation: ""))
+    PostView(post: Post(user: UserProfileModel(id: "firebaseID", username: "username", displayName: "displayname", dateJoined: Date()) ,title: "Detroit Golf Club", score: "72", holes: "18", greensInRegulation: "", datePosted: "\(Date().formatted(date: .numeric, time: .shortened))"))
 }
