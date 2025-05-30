@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AddPostView: View {
     @EnvironmentObject var userViewModel: UserProfileViewModel
+    @Environment(\.dismiss) var dismiss
     
     @State var postVM: PostViewModel
     
@@ -17,12 +18,63 @@ struct AddPostView: View {
     @State private var holes = ""
     @State private var greensInRegulation = ""
     @State private var showError: Bool = false
+    @State private var isPosting: Bool = false
     
     var conditionCheck: Bool {
-        Int(score) ?? 0 < 1000 && Int(holes) ?? 0 < 19 && Int(greensInRegulation) ?? 0 < 19 && Int(score) ?? 0 > 0 && Int(holes) ?? 0 > 0 && Int(greensInRegulation) ?? 0 > 0
+        if holes.isEmpty || greensInRegulation.isEmpty{
+            true
+        } else {
+            Int(score) ?? 0 < 1000 && Int(holes) ?? 0 < 19 && Int(greensInRegulation) ?? 0 < 19 && Int(score) ?? 0 > 0 && Int(holes) ?? 0 > 0 && Int(greensInRegulation) ?? 0 > 0
+        }
     }
     
     var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                // Preview of the post
+                postPreview
+                
+                // Post button
+                Button {
+                    createPost()
+                } label: {
+                    ZStack {
+                        Capsule()
+                            .frame(width: 128, height: 48)
+                            .foregroundStyle(isPosting ? .gray : .green)
+                        
+                        if isPosting {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Text("Post")
+                                .font(.headline.weight(.semibold))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                }
+                //.disabled(isPosting || !isValidPost())
+                .padding()
+                
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("Share Your Round")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+            .alert(isPresented: $showError) {
+                Alert(title: Text("Error"), message: Text(errorMessage()))
+            }
+        }
+    }
+    
+    var postPreview: some View {
         ZStack{
             RoundedRectangle(cornerRadius: 20)
                 .foregroundStyle(.gray.opacity(0.15))
@@ -48,28 +100,6 @@ struct AddPostView: View {
             }
         }
         .frame(width: 325, height: 200)
-        
-        Button {
-            if checkCases() {
-                postVM.addPost(Post(user: userViewModel.currentUser,title: title, score: score, holes: holes, greensInRegulation: greensInRegulation, datePosted: "\(Date().formatted(date: .numeric, time: .shortened))"))
-            }
-            else {
-                showError = true
-            }
-        } label: {
-            ZStack{
-                Capsule()
-                    .frame(width: 128, height: 48)
-                    .foregroundStyle(.green)
-                Text("Post")
-                    .font(.headline.weight(.semibold))
-                    .foregroundStyle(.white)
-            }
-        }
-        .padding()
-        .alert(isPresented: $showError) {
-            Alert(title: Text("Error"), message: Text(errorMessage()))
-        }
     }
     
     var postHeader: some View {
@@ -86,7 +116,7 @@ struct AddPostView: View {
     }
     
     var courseName: some View {
-        TextField("Course", text: $title)
+        TextField("Course*", text: $title)
             .frame(height: 25)
             .font(.title3.weight(.light))
             .lineLimit(1)
@@ -107,7 +137,7 @@ struct AddPostView: View {
                     .foregroundStyle(.gray.opacity(0.25))
                     .frame(width: 70, height: 70)
                 VStack {
-                    Text("Score")
+                    Text("Score*")
                         .font(.caption2)
                     TextField("--", text: $score)
                         .foregroundStyle(.green)
@@ -115,6 +145,7 @@ struct AddPostView: View {
                         .multilineTextAlignment(.center)
                         .frame(width: 60)
                         .textFieldStyle(PlainTextFieldStyle())
+                        .keyboardType(.numberPad)
                 }
             }
             ZStack{
@@ -130,6 +161,7 @@ struct AddPostView: View {
                         .multilineTextAlignment(.center)
                         .frame(width: 60)
                         .textFieldStyle(PlainTextFieldStyle())
+                        .keyboardType(.numberPad)
                 }
             }
             ZStack{
@@ -145,10 +177,43 @@ struct AddPostView: View {
                         .multilineTextAlignment(.center)
                         .frame(width: 60)
                         .textFieldStyle(PlainTextFieldStyle())
+                        .keyboardType(.numberPad)
                 }
             }
         }
         .frame(height: 70)
+    }
+    
+    // MARK: - Methods
+    
+    func createPost() {
+        guard isValidPost() else {
+            showError = true
+            return
+        }
+        
+        isPosting = true
+        
+        let newPost = Post(
+            user: userViewModel.currentUser,
+            title: title,
+            score: score,
+            holes: holes,
+            greensInRegulation: greensInRegulation,
+            datePosted: "\(Date().formatted(date: .numeric, time: .shortened))"
+        )
+        
+        postVM.addPost(newPost)
+        
+        // Give a moment for the post to save, then dismiss
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            isPosting = false
+            dismiss()
+        }
+    }
+    
+    func isValidPost() -> Bool {
+        return !title.isEmpty && !score.isEmpty && checkCases()
     }
     
     func checkCases() -> Bool {
@@ -159,6 +224,7 @@ struct AddPostView: View {
                     return false
                 }
             }
+
             if conditionCheck {
                 return true
             } else {
@@ -184,7 +250,7 @@ struct AddPostView: View {
             }
             for char in greensInRegulation {
                 if char.isNumber == false {
-                    return "Must enter a number for Greens In Regulation"
+                    return "Must enter a number for GIR"
                 }
             }
             if conditionCheck {

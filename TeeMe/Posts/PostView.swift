@@ -6,10 +6,13 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct PostView: View {
-        
+    @EnvironmentObject var postViewModel: PostViewModel
     @StateObject var post: Post
+    
+    @State private var showDeleteAlert = false
     
     var body: some View {
         ZStack{
@@ -17,7 +20,6 @@ struct PostView: View {
                 .foregroundStyle(.gray.opacity(0.20))
             VStack(spacing: 0) {
                 postHeader
-                    .padding(.top)
                 
                 Spacer()
                 
@@ -29,33 +31,52 @@ struct PostView: View {
                 
                 Spacer()
                 
-                HStack(spacing: 4) {
-                    likeButton
-                        .padding(.leading)
-                        
-                    Text("\(post.likes)")
-                        .font(.caption.weight(.medium))
-                    Spacer()
-                }
-                .padding(.bottom)
+                postFooter
+                
             }
         }
         .frame(width: 325, height: 200)
+        .alert("Delete Post", isPresented: $showDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                postViewModel.deletePost(post)
+            }
+        } message: {
+            Text("Are you sure you want to delete this post? This action cannot be undone.")
+        }
     }
     
     var postHeader: some View {
         HStack{
             Text(post.user.displayName)
                 .font(.headline.weight(.bold))
+            Text("@\(post.user.username)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            
             Spacer()
-            Text(post.datePosted)
-                .font(.caption.weight(.thin))
+            
+            // Menu button - only show if user owns the post
+            if post.user.id == Auth.auth().currentUser?.uid {
+                Menu {
+                    Button(role: .destructive) {
+                        showDeleteAlert = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .foregroundStyle(.gray)
+                        .font(.title3)
+                }
+            }
         }
         .frame(height: 16)
         .lineLimit(1)
         .allowsTightening(true)
         .minimumScaleFactor(0.25)
         .padding(.horizontal)
+        .padding(.top)
     }
     
     var courseName: some View {
@@ -68,19 +89,32 @@ struct PostView: View {
             .padding(.horizontal)
     }
     
-    var likeButton: some View {
-        Button {
-            if post.isLiked {
-                post.dislikePost()
-            } else {
-                post.likePost()
+    var postFooter: some View {
+        HStack(spacing: 4){
+            Button {
+                if post.isLiked {
+                    post.dislikePost()
+                } else {
+                    post.likePost()
+                }
+            } label: {
+                ZStack{
+                    Image(systemName: "hand.thumbsup.fill")
+                        .foregroundStyle(post.isLiked ? .green : .gray.opacity(0.50))
+                }
             }
-        } label: {
-            ZStack{
-                Image(systemName: "hand.thumbsup.fill")
-                    .foregroundStyle(post.isLiked ? .green : .gray.opacity(0.50))
-            }
+            .padding(.leading)
+            
+            Text("\(post.likes)")
+                .font(.caption.weight(.medium))
+            
+            Spacer()
+            
+            Text(post.datePosted)
+                .font(.caption.weight(.thin))
+                .padding(.trailing)
         }
+        .padding(.bottom)
     }
     
     var mainContent: some View {
@@ -128,4 +162,5 @@ struct PostView: View {
 
 #Preview {
     PostView(post: Post(user: UserProfileModel(id: "firebaseID", username: "username", displayName: "displayname", dateJoined: Date()) ,title: "Detroit Golf Club", score: "72", holes: "18", greensInRegulation: "", datePosted: "\(Date().formatted(date: .numeric, time: .shortened))"))
+        .environmentObject(PostViewModel())
 }
