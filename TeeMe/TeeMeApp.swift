@@ -24,12 +24,14 @@ struct TeeMeApp: App {
     
     // Create shared course data model
     @StateObject private var courseModel = CourseDataModel()
+    @StateObject private var userProfileViewModel = UserProfileViewModel()
     
     var body: some Scene {
         WindowGroup {
             //CloudKitTeeMe()
             ContentView()
                 .environmentObject(courseModel)
+                .environmentObject(userProfileViewModel)
         }
     }
 }

@@ -197,7 +197,7 @@ struct MapView: View {
             
         } label: {
             ZStack{
-                RoundedRectangle(cornerRadius: 35)
+                Capsule()
                     .frame(width: 128, height: 48)
                     .foregroundColor(.green)
                 Text(searchIsFocused ? "Search" : "Load")
