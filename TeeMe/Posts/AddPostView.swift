@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AddPostView: View {
     @EnvironmentObject var userViewModel: UserProfileViewModel
+    @EnvironmentObject var courseModel: CourseDataModel
     @Environment(\.dismiss) var dismiss
     
     @State var postVM: PostViewModel
@@ -19,6 +20,10 @@ struct AddPostView: View {
     @State private var greensInRegulation = ""
     @State private var showError: Bool = false
     @State private var isPosting: Bool = false
+    
+    private var courseNames: [String] {
+        courseModel.favoriteCourses.compactMap { $0.name }
+    }
     
     var conditionCheck: Bool {
         if holes.isEmpty || greensInRegulation.isEmpty{
@@ -53,7 +58,6 @@ struct AddPostView: View {
                         }
                     }
                 }
-                //.disabled(isPosting || !isValidPost())
                 .padding()
                 
                 Spacer()
@@ -116,13 +120,20 @@ struct AddPostView: View {
     }
     
     var courseName: some View {
-        TextField("Course*", text: $title)
-            .frame(height: 25)
-            .font(.title3.weight(.light))
-            .lineLimit(1)
-            .allowsTightening(true)
-            .minimumScaleFactor(0.25)
-            .padding(.horizontal)
+        Picker("", selection: $title){
+            Text(courseModel.favoriteCourses.isEmpty ? "Favorite a course to get started" : "Select Favorite Course*").tag("")
+            ForEach(courseNames, id: \.self) { name in
+                Text(name).tag(name)
+            }
+        }
+        .pickerStyle(.automatic)
+        .frame(height: 25)
+        .font(.title3.weight(.light))
+        .lineLimit(1)
+        .allowsTightening(true)
+        .minimumScaleFactor(0.25)
+        .padding(.horizontal)
+        
     }
     
     var likeButton: some View {
@@ -191,6 +202,8 @@ struct AddPostView: View {
             showError = true
             return
         }
+        
+        userViewModel.loadCurrentUser()
         
         isPosting = true
         
@@ -269,4 +282,5 @@ struct AddPostView: View {
 #Preview {
     AddPostView(postVM: PostViewModel())
         .environmentObject(UserProfileViewModel())
+        .environmentObject(CourseDataModel())
 }

@@ -38,7 +38,8 @@ class PostService {
             "holes": post.holes,
             "greensInRegulation": post.greensInRegulation,
             "likes": post.likes,
-            "datePosted": Timestamp(date: Date()),
+            "createdAt": Timestamp(date: Date()),
+            "datePosted": post.datePosted
         ]
         
         // Save to user's posts subcollection

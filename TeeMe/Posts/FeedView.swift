@@ -11,6 +11,7 @@ import FirebaseAuth
 struct FeedView: View {
     @StateObject var postViewModel = PostViewModel()
     @EnvironmentObject var userViewModel: UserProfileViewModel
+    @EnvironmentObject var courseModel: CourseDataModel
     
     @State var showAddPostView = false
     @State private var selectedSegment = 0 // 0 = All Posts, 1 = My Posts
@@ -35,6 +36,10 @@ struct FeedView: View {
                     if Auth.auth().currentUser == nil {
                         // Not signed in view
                         notSignedInView
+                        
+                        if courseModel.showSignIn {
+                            AuthView()
+                        }
                     } else if postViewModel.isLoading {
                         // Loading view
                         ProgressView("Loading posts...")
@@ -97,6 +102,9 @@ struct FeedView: View {
             } message: {
                 Text("Are you sure you want to delete this post? This action cannot be undone.")
             }
+            .onAppear {
+                postViewModel.loadAllPosts()
+            }
         }
     }
     
@@ -111,11 +119,30 @@ struct FeedView: View {
     // MARK: - Subviews
     
     private var notSignedInView: some View {
-        ContentUnavailableView(
-            "Sign In to View Posts",
-            systemImage: "person.slash",
-            description: Text("Create an account to share your golf scores and see what others are playing.")
-        )
+        VStack{
+            ContentUnavailableView(
+                "Sign In to View Posts",
+                systemImage: "person.slash",
+                description: Text("Create an account to share your golf scores and see what others are playing.")
+            )
+            
+            Button {
+                courseModel.showSignIn = true  // Show authentication view when pressed
+            } label: {
+                ZStack{
+                    // Green rounded rectangle button
+                    RoundedRectangle(cornerRadius: 10)
+                        .frame(width: 300, height: 50)
+                        .foregroundStyle(.green)
+                        .padding()
+                    // Button text
+                    Text("Sign In")
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                }
+            }
+        }
+        .padding()
     }
     
     private var allPostsView: some View {
@@ -163,9 +190,11 @@ struct FeedView: View {
             }
         }
     }
+    
 }
 
 #Preview {
     FeedView()
         .environmentObject(UserProfileViewModel())
+        .environmentObject(CourseDataModel())
 }
