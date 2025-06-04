@@ -49,7 +49,8 @@ struct FeedView: View {
                         allPostsView
                     } else {
                         // User posts view
-                        userPostsView
+                        UserPostsView()
+                            .environmentObject(postViewModel)
                     }
                 }
             }
@@ -68,7 +69,7 @@ struct FeedView: View {
                 }
             }
             .sheet(isPresented: $showAddPostView) {
-                AddPostView(postVM: postViewModel)
+                AddPostView(postVM: postViewModel, courseModel: courseModel)
                     .presentationDetents([.medium, .large])
             }
             .refreshable {

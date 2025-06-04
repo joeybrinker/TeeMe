@@ -40,6 +40,7 @@ struct PostView: View {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
                 postViewModel.deletePost(post)
+                postViewModel.refreshPosts()
             }
         } message: {
             Text("Are you sure you want to delete this post? This action cannot be undone.")

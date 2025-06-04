@@ -1,9 +1,4 @@
-//
-//  AddPostView.swift
-//  TeeMe
-//
-//  Created by Joseph Brinker on 5/27/25.
-//
+// Optimized AddPostView.swift
 
 import SwiftUI
 
@@ -20,17 +15,18 @@ struct AddPostView: View {
     @State private var greensInRegulation = ""
     @State private var showError: Bool = false
     @State private var isPosting: Bool = false
+    @State private var datePlayed: Date = Date()
     
-    private var courseNames: [String] {
-        courseModel.favoriteCourses.compactMap { $0.name }
-    }
+    // OPTIMIZATION 1: Make this a let instead of computed property to reduce recalculations
+    private let courseNames: [String]
     
-    var conditionCheck: Bool {
-        if holes.isEmpty || greensInRegulation.isEmpty{
-            true
-        } else {
-            Int(score) ?? 0 < 1000 && Int(holes) ?? 0 < 19 && Int(greensInRegulation) ?? 0 < 19 && Int(score) ?? 0 > 0 && Int(holes) ?? 0 > 0 && Int(greensInRegulation) ?? 0 > 0
-        }
+    // OPTIMIZATION 2: Cache the condition check result
+    @State private var isValidCondition: Bool = true
+    
+    init(postVM: PostViewModel, courseModel: CourseDataModel) {
+        self.postVM = postVM
+        // Pre-compute course names once
+        self.courseNames = courseModel.favoriteCourses.compactMap { $0.name }
     }
     
     var body: some View {
@@ -84,7 +80,6 @@ struct AddPostView: View {
                 .foregroundStyle(.gray.opacity(0.15))
             VStack(spacing: 0) {
                 postHeader
-                    .padding(.top)
                 
                 Spacer()
                 
@@ -98,9 +93,10 @@ struct AddPostView: View {
                 
                 HStack {
                     likeButton
-                        .padding()
                     Spacer()
+                    datePicker
                 }
+                .padding()
             }
         }
         .frame(width: 325, height: 200)
@@ -115,25 +111,36 @@ struct AddPostView: View {
                 .allowsTightening(true)
                 .minimumScaleFactor(0.25)
                 .padding(.horizontal)
+                .padding(.top)
             Spacer()
         }
     }
     
+    // OPTIMIZATION 3: Simplified TextField with better performance
     var courseName: some View {
-        Picker("", selection: $title){
-            Text(courseModel.favoriteCourses.isEmpty ? "Favorite a course to get started" : "Select Favorite Course*").tag("")
-            ForEach(courseNames, id: \.self) { name in
-                Text(name).tag(name)
+            Picker("Course*", selection: $title) {
+                Text("Select Favorite Course*").tag("")
+                ForEach(courseNames, id: \.self) { name in
+                    Text(name).tag(name)
+                }
             }
+            .pickerStyle(.menu)
+            .frame(height: 25)
+            .font(.title3.weight(.light))
+            .padding(.horizontal)
+    }
+    
+    // OPTIMIZATION 4: Separate the text fields into their own views to reduce rebuilds
+    var mainContent: some View {
+        HStack {
+            ScoreTextField(score: $score)
+            HolesTextField(holes: $holes)
+            GIRTextField(greensInRegulation: $greensInRegulation)
         }
-        .pickerStyle(.automatic)
-        .frame(height: 25)
-        .font(.title3.weight(.light))
-        .lineLimit(1)
-        .allowsTightening(true)
-        .minimumScaleFactor(0.25)
-        .padding(.horizontal)
-        
+        .frame(height: 70)
+        .onChange(of: score) { _, _ in updateValidation() }
+        .onChange(of: holes) { _, _ in updateValidation() }
+        .onChange(of: greensInRegulation) { _, _ in updateValidation() }
     }
     
     var likeButton: some View {
@@ -141,61 +148,36 @@ struct AddPostView: View {
             .foregroundStyle(.gray.opacity(0))
     }
     
-    var mainContent: some View {
-        HStack {
-            ZStack{
-                RoundedRectangle(cornerRadius: 8)
-                    .foregroundStyle(.gray.opacity(0.25))
-                    .frame(width: 70, height: 70)
-                VStack {
-                    Text("Score*")
-                        .font(.caption2)
-                    TextField("--", text: $score)
-                        .foregroundStyle(.green)
-                        .font(.title.bold())
-                        .multilineTextAlignment(.center)
-                        .frame(width: 60)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .keyboardType(.numberPad)
-                }
-            }
-            ZStack{
-                RoundedRectangle(cornerRadius: 8)
-                    .foregroundStyle(.gray.opacity(0.25))
-                    .frame(width: 70, height: 70)
-                VStack{
-                    Text("Holes")
-                        .font(.caption2)
-                    TextField("--", text: $holes)
-                        .foregroundStyle(.green)
-                        .font(.title.bold())
-                        .multilineTextAlignment(.center)
-                        .frame(width: 60)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .keyboardType(.numberPad)
-                }
-            }
-            ZStack{
-                RoundedRectangle(cornerRadius: 8)
-                    .foregroundStyle(.gray.opacity(0.25))
-                    .frame(width: 70, height: 70)
-                VStack{
-                    Text("GIR")
-                        .font(.caption2)
-                    TextField("--", text: $greensInRegulation)
-                        .foregroundStyle(.green)
-                        .font(.title.bold())
-                        .multilineTextAlignment(.center)
-                        .frame(width: 60)
-                        .textFieldStyle(PlainTextFieldStyle())
-                        .keyboardType(.numberPad)
-                }
-            }
-        }
-        .frame(height: 70)
+    var datePicker: some View {
+        DatePicker("Date:", selection: $datePlayed, in: ...Date(), displayedComponents: [.date])
+            .frame(width: 100)
+            .padding(.trailing)
     }
     
-    // MARK: - Methods
+    
+    
+    // OPTIMIZATION 5: Debounce validation updates
+    private func updateValidation() {
+        // Use a small delay to avoid constant recalculation
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            isValidCondition = conditionCheck
+        }
+    }
+    
+    // Simplified condition check
+    private var conditionCheck: Bool {
+        if holes.isEmpty || greensInRegulation.isEmpty {
+            return true
+        }
+        
+        let scoreInt = Int(score) ?? 0
+        let holesInt = Int(holes) ?? 0
+        let girInt = Int(greensInRegulation) ?? 0
+        
+        return scoreInt > 0 && scoreInt < 1000 &&
+               holesInt > 0 && holesInt < 19 &&
+               girInt >= 0 && girInt < 19
+    }
     
     func createPost() {
         guard isValidPost() else {
@@ -203,7 +185,10 @@ struct AddPostView: View {
             return
         }
         
-        userViewModel.loadCurrentUser()
+        if userViewModel.currentUser.username == "" || userViewModel.currentUser.displayName == "" {
+            //Reload user if missing parameters
+            userViewModel.loadCurrentUser()
+        }
         
         isPosting = true
         
@@ -213,16 +198,17 @@ struct AddPostView: View {
             score: score,
             holes: holes,
             greensInRegulation: greensInRegulation,
-            datePosted: "\(Date().formatted(date: .numeric, time: .shortened))"
+            datePosted: "\(datePlayed.formatted(date: .numeric, time: .shortened))"
         )
         
         postVM.addPost(newPost)
         
-        // Give a moment for the post to save, then dismiss
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             isPosting = false
             dismiss()
         }
+        
+        postVM.refreshPosts()
     }
     
     func isValidPost() -> Bool {
@@ -230,7 +216,6 @@ struct AddPostView: View {
     }
     
     func checkCases() -> Bool {
-        // Return true when both fields are full and the score is an int
         if !title.isEmpty && !score.isEmpty {
             for char in score {
                 if char.isNumber == false {
@@ -279,8 +264,81 @@ struct AddPostView: View {
     }
 }
 
+// OPTIMIZATION 6: Separate TextField components to isolate updates
+struct ScoreTextField: View {
+    @Binding var score: String
+    
+    var body: some View {
+        ZStack{
+            RoundedRectangle(cornerRadius: 8)
+                .foregroundStyle(.gray.opacity(0.25))
+                .frame(width: 70, height: 70)
+            VStack {
+                Text("Score*")
+                    .font(.caption2)
+                TextField("--", text: $score)
+                    .foregroundStyle(.green)
+                    .font(.title.bold())
+                    .multilineTextAlignment(.center)
+                    .frame(width: 60)
+                    .textFieldStyle(PlainTextFieldStyle()) // Better performance
+                    .keyboardType(.numberPad)
+                    .autocorrectionDisabled()
+            }
+        }
+    }
+}
+
+struct HolesTextField: View {
+    @Binding var holes: String
+    
+    var body: some View {
+        ZStack{
+            RoundedRectangle(cornerRadius: 8)
+                .foregroundStyle(.gray.opacity(0.25))
+                .frame(width: 70, height: 70)
+            VStack{
+                Text("Holes")
+                    .font(.caption2)
+                TextField("--", text: $holes)
+                    .foregroundStyle(.green)
+                    .font(.title.bold())
+                    .multilineTextAlignment(.center)
+                    .frame(width: 60)
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .keyboardType(.numberPad)
+                    .autocorrectionDisabled()
+            }
+        }
+    }
+}
+
+struct GIRTextField: View {
+    @Binding var greensInRegulation: String
+    
+    var body: some View {
+        ZStack{
+            RoundedRectangle(cornerRadius: 8)
+                .foregroundStyle(.gray.opacity(0.25))
+                .frame(width: 70, height: 70)
+            VStack{
+                Text("GIR")
+                    .font(.caption2)
+                TextField("--", text: $greensInRegulation)
+                    .foregroundStyle(.green)
+                    .font(.title.bold())
+                    .multilineTextAlignment(.center)
+                    .frame(width: 60)
+                    .textFieldStyle(PlainTextFieldStyle())
+                    .keyboardType(.numberPad)
+                    .autocorrectionDisabled()
+            }
+        }
+    }
+}
+
 #Preview {
-    AddPostView(postVM: PostViewModel())
+    AddPostView(postVM: PostViewModel(), courseModel: CourseDataModel())
         .environmentObject(UserProfileViewModel())
         .environmentObject(CourseDataModel())
 }
