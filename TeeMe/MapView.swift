@@ -220,7 +220,6 @@ struct MapView: View {
             Button {
                 isShowingInfo = false
                 isShowingDetails = true
-                print("Showing Details")
             } label: {
                 Text("More Details")
                     .foregroundStyle(.primary)

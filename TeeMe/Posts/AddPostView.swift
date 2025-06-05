@@ -185,10 +185,7 @@ struct AddPostView: View {
             return
         }
         
-        if userViewModel.currentUser.username == "" || userViewModel.currentUser.displayName == "" {
-            //Reload user if missing parameters
-            userViewModel.loadCurrentUser()
-        }
+        userViewModel.loadCurrentUser()
         
         isPosting = true
         
