@@ -28,6 +28,8 @@ struct MapView: View {
     @State private var searchText: String = ""
     @State private var isShowingInfo: Bool = false
     @State private var isShowingDetails: Bool = false
+    // Look Around scene for the selected location
+    @State private var lookAroundScene: MKLookAroundScene?
     
     @State var timesloaded: Int8 = 0
         
@@ -54,6 +56,8 @@ struct MapView: View {
                         isShowingInfo = false
                         searchIsFocused = false
                     }
+                    
+                    getLookAroundScene()
                 }
                 .onAppear{
                     locationManager.requestWhenInUseAuthorization()
@@ -225,6 +229,18 @@ struct MapView: View {
                     .foregroundStyle(.primary)
             }
             
+//            // Look Around preview if available, otherwise show map snapshot
+//            if let lookAroundScene = lookAroundScene {
+//                LookAroundPreview(initialScene: lookAroundScene)
+//                    .frame(height: 200)
+//                    .cornerRadius(12)
+//                    .padding()
+//            }
+//            else {
+//                ContentUnavailableView("No Preview Available", systemImage: "eye.slash", description: Text("Could not find a preview for this location."))
+//                    .frame(height: 200)
+//            }
+            
             Spacer()
         }
     }
@@ -271,6 +287,19 @@ struct MapView: View {
                     span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
                 ))
             }
+        }
+    }
+    
+    // Fetch Look Around scene for the selected location
+    private func getLookAroundScene() {
+        lookAroundScene = nil
+        
+        guard let selectedMapItem else { return }
+        
+        let lookAroundRequest = MKLookAroundSceneRequest(mapItem: selectedMapItem)
+        
+        Task {
+            lookAroundScene = try? await lookAroundRequest.scene
         }
     }
 }
