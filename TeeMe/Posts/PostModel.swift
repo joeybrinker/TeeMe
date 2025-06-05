@@ -22,6 +22,8 @@ class Post: ObservableObject, Hashable {
     @Published var isLiked: Bool = false
     @Published var likes: Int = 0
     
+    //var createdAt: Date = Date()
+    
     // Firestore document ID for database operations
     var firestoreId: String?
     
@@ -35,14 +37,14 @@ class Post: ObservableObject, Hashable {
         self.holes = holes
         self.greensInRegulation = greensInRegulation
         
-        // Use provided date or generate current date
         if let datePosted = datePosted {
             self.datePosted = datePosted
         } else {
             self.datePosted = "\(Date().formatted(date: .numeric, time: .shortened))"
         }
         
-        // Don't check like status here - will be called after firestoreId is set
+        // createdAt will be set from Firestore when loading existing posts
+        // For new posts, it stays as the initialization date until saved
     }
     
     /**

@@ -55,9 +55,6 @@ struct UserProfileView: View {
                 .onAppear {
                     viewModel.loadCurrentUser()
                 }
-                .onAppear() {
-                    viewModel.loadCurrentUser()
-                }
         }
         // Profile View - Fully authenticated and profile set up
         else {

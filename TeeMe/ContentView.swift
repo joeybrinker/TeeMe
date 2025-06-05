@@ -38,6 +38,7 @@ struct ContentView: View {
                 
                 FeedView()
                     .environmentObject(userProfileViewModel)
+                    .environmentObject(courseModel)
                     .tabItem {
                         Label("Feed", systemImage: "note.text")
                     }
