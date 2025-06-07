@@ -106,7 +106,6 @@ struct CourseInfoView: View {
                     .background(.ultraThickMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 4))
                 }
-                .buttonStyle(PlainButtonStyle())
             }
             .padding(.horizontal)
             

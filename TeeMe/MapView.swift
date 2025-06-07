@@ -102,7 +102,7 @@ struct MapView: View {
             centerUserLocationButton
         }
         .overlay(alignment: .top) {
-            searchBar
+                searchBar
         }
         .overlay(alignment: .bottom) {
             searchButton
