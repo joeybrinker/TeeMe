@@ -1,10 +1,3 @@
-//
-//  CourseInfoView.swift
-//  TeeMe
-//
-//  Created by Joseph Brinker on 10/5/24.
-//
-
 import SwiftUI
 import MapKit
 import FirebaseAuth
@@ -14,9 +7,6 @@ struct CourseInfoView: View {
     
     // Add this line to use the shared model
     @EnvironmentObject var courseModel: CourseDataModel
-    
-    // Look Around scene for the selected location
-    @State private var lookAroundScene: MKLookAroundScene?
     
     // Input properties passed from parent view
     var selectedMapItem: MKMapItem?
@@ -28,6 +18,8 @@ struct CourseInfoView: View {
     // Weather
     @StateObject private var weatherManager = WeatherKitManager()
     
+    // Weather forecast sheet
+    @State private var showingWeatherForecast: Bool = false
     
     // MARK: - Computed Properties
     
@@ -49,8 +41,24 @@ struct CourseInfoView: View {
                 // Set initial favorite state when view appears
                 if let course = selectedMapItem {
                     isFavorited = courseModel.isFavorite(courseName: course.placemark.name ?? "")
-                    weatherManager.fetchWeather(for: CLLocation(latitude: selectedMapItem?.placemark.coordinate.latitude ?? 0, longitude: selectedMapItem?.placemark.coordinate.longitude ?? 0))
+                    weatherManager.fetchWeather(for: CLLocation(
+                        latitude: selectedMapItem?.placemark.coordinate.latitude ?? 0,
+                        longitude: selectedMapItem?.placemark.coordinate.longitude ?? 0
+                    ))
                 }
+            }
+            .onChange(of: selectedMapItem) { _, newValue in
+                // Update weather when course changes
+                if let course = newValue {
+                    isFavorited = courseModel.isFavorite(courseName: course.placemark.name ?? "")
+                    weatherManager.fetchWeather(for: CLLocation(
+                        latitude: course.placemark.coordinate.latitude,
+                        longitude: course.placemark.coordinate.longitude
+                    ))
+                }
+            }
+            .sheet(isPresented: $showingWeatherForecast) {
+                WeatherForecastView(weatherManager: weatherManager)
             }
     }
     
@@ -58,37 +66,53 @@ struct CourseInfoView: View {
     
     // Information overlay showing name and travel time
     private var overlayContent: some View {
-        //        VStack{
-        //            HStack {
-        VStack(alignment: .center, spacing: 5) {
+        VStack(alignment: .center, spacing: 15) {
             // Location name
             if let name = selectedMapItem?.name {
                 Text(name)
-                    .font(.title)
+                    .font(.title2)
+                    .fontWeight(.semibold)
                     .padding()
-                    .lineLimit(1)
-                    .allowsTightening(true)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
             }
-            
             
             HStack {
                 // Travel time if available
                 if let time = travelTime {
                     Text("Travel time: \(time)")
+                        .font(.subheadline)
                 }
                 else {
-                    Text("Travel time: ")
+                    Text("Travel time: --")
+                        .font(.subheadline)
                 }
                 
                 Spacer()
                 
-                Label(weatherManager.temperature, systemImage: weatherManager.symbolName)
+                // Tappable weather display with colorful symbol
+                Button {
+                    showingWeatherForecast = true
+                } label: {
+                    HStack(spacing: 4) {
+                        WeatherSymbolView(symbolName: weatherManager.symbolName)
+                            .frame(width: 20, height: 20)
+                        
+                        Text(weatherManager.temperature)
+                            .foregroundColor(.primary)
+                            .font(.subheadline)
+                    }
+                    .padding(5)
+                    .background(.ultraThickMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
             }
             .padding(.horizontal)
             
             // Favorite button - updated to use the course model
             HStack{
                 Text(isFavorited ? "Remove from favorites" : "Add to favorites")
+                    .font(.subheadline)
                 
                 Spacer()
                 
@@ -109,7 +133,8 @@ struct CourseInfoView: View {
                 }
                 .font(.title3)
             }
-            .padding()
+            .padding(.horizontal)
+            .padding(.bottom)
         }
     }
 }

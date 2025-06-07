@@ -1,10 +1,3 @@
-//
-//  WeatherKitManager.swift
-//  TeeMe
-//
-//  Created by Joseph Brinker on 5/12/25.
-//
-
 import Foundation
 import WeatherKit
 import CoreLocation
@@ -14,11 +7,15 @@ final class WeatherKitManager: ObservableObject {
     @Published var temperature: String = "--"
     @Published var symbolName: String = "questionmark"
     @Published var usesFahrenheit: Bool = true
+    @Published var weeklyForecast: [DayWeather] = []
+    @Published var isLoadingForecast: Bool = false
     
     private let weatherService = WeatherService.shared
     private var currentTemperature: Measurement<UnitTemperature>?
+    private var currentLocation: CLLocation?
     
     func fetchWeather(for location: CLLocation) {
+        currentLocation = location
         Task {
             do {
                 let current = try await weatherService.weather(for: location, including: .current)
@@ -27,6 +24,23 @@ final class WeatherKitManager: ObservableObject {
                 symbolName = current.symbolName
             } catch {
                 print("WeatherKit error:", error)
+            }
+        }
+    }
+    
+    func fetchWeeklyForecast() {
+        guard let location = currentLocation else { return }
+        
+        isLoadingForecast = true
+        
+        Task {
+            do {
+                let weather = try await weatherService.weather(for: location, including: .daily)
+                weeklyForecast = Array(weather.forecast.prefix(7)) // Get 7 days
+                isLoadingForecast = false
+            } catch {
+                print("Weekly forecast error:", error)
+                isLoadingForecast = false
             }
         }
     }

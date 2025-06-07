@@ -29,20 +29,22 @@ struct ContentView: View {
                     }
                     .tag(1)
                 
-                UserProfileView()
-                    .environmentObject(courseModel)
-                    .tabItem {
-                        Label("Profile", systemImage: "person")
-                    }
-                    .tag(2)
-                
                 FeedView()
                     .environmentObject(userProfileViewModel)
                     .environmentObject(courseModel)
                     .tabItem {
                         Label("Feed", systemImage: "note.text")
                     }
+                    .tag(2)
+                
+                UserProfileView()
+                    .environmentObject(courseModel)
+                    .tabItem {
+                        Label("Profile", systemImage: "person")
+                    }
                     .tag(3)
+                
+                
             }
             .accentColor(.green) //Will be depreciated in later versions
     }
