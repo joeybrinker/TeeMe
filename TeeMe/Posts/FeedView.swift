@@ -18,6 +18,8 @@ struct FeedView: View {
     @State private var showDeleteConfirmation = false
     @State private var postToDelete: Post?
     
+    @State private var showingEditProfile = false
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -40,6 +42,21 @@ struct FeedView: View {
                         if courseModel.showSignIn {
                             AuthView()
                         }
+                    }
+                    else if userViewModel.currentUser.id.isEmpty {
+                        profileNotSetupView
+                        // Present the profile setup sheet when showingEditProfile is true
+                            .sheet(isPresented: $showingEditProfile) {
+                                ProfileSetupView()
+                                    .environmentObject(courseModel)
+                                    .environmentObject(userViewModel)
+                                    .onDisappear {
+                                        userViewModel.loadCurrentUser()
+                                    }
+                            }
+                            .onAppear {
+                                userViewModel.loadCurrentUser()
+                            }
                     } else if postViewModel.isLoading {
                         // Loading view
                         ProgressView("Loading posts...")
@@ -57,7 +74,7 @@ struct FeedView: View {
             .navigationTitle(Text("Feed"))
             .toolbar {
                 // Only show add post button if user is signed in
-                if Auth.auth().currentUser != nil {
+                if Auth.auth().currentUser != nil && !userViewModel.currentUser.id.isEmpty {
                     ToolbarItem {
                         Button {
                             showAddPostView = true
@@ -190,6 +207,33 @@ struct FeedView: View {
                 .scrollIndicators(.automatic)
             }
         }
+    }
+    
+    private var profileNotSetupView: some View {
+        VStack(spacing: 20) {
+            // Unavailable content placeholder with description
+            ContentUnavailableView("Complete your profile",
+                                   systemImage: "person.crop.circle.badge.plus",
+                                   description: Text("Set up your golf profile to view and post scores."))
+            
+            // Profile setup button
+            Button {
+                showingEditProfile = true  // Show profile setup view when pressed
+            } label: {
+                ZStack{
+                    // Green rounded rectangle button
+                    RoundedRectangle(cornerRadius: 10)
+                        .frame(width: 300, height: 50)
+                        .foregroundStyle(.green)
+                        .padding()
+                    // Button text
+                    Text("Set Up Profile")
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                }
+            }
+        }
+        .padding()
     }
     
 }

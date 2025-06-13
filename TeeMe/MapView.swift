@@ -69,6 +69,10 @@ struct MapView: View {
             
             if courseModel.showSignIn {
                 AuthView()
+                    .onAppear {
+                        selectedMapItem = nil
+                    }
+                
             }
         }
     }
@@ -119,8 +123,6 @@ struct MapView: View {
             }
         }
         .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
-        
-        
         //Course Info View Sheet
         .sheet(isPresented: $isShowingInfo, content: {
             bottomOverlay
@@ -228,18 +230,6 @@ struct MapView: View {
                 Text("More Details")
                     .foregroundStyle(.primary)
             }
-            
-//            // Look Around preview if available, otherwise show map snapshot
-//            if let lookAroundScene = lookAroundScene {
-//                LookAroundPreview(initialScene: lookAroundScene)
-//                    .frame(height: 200)
-//                    .cornerRadius(12)
-//                    .padding()
-//            }
-//            else {
-//                ContentUnavailableView("No Preview Available", systemImage: "eye.slash", description: Text("Could not find a preview for this location."))
-//                    .frame(height: 200)
-//            }
             
             Spacer()
         }
