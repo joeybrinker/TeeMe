@@ -39,6 +39,7 @@ struct ContentView: View {
                 
                 UserProfileView()
                     .environmentObject(courseModel)
+                    .environmentObject(userProfileViewModel)
                     .tabItem {
                         Label("Profile", systemImage: "person")
                     }

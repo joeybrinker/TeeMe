@@ -14,11 +14,7 @@ import FirebaseAuth // Library for Firebase authentication services
 /// Uses an MVVM pattern with UserProfileViewModel to handle the data and business logic
 struct UserProfileView: View {
     // MARK: - Properties
-    
-    // StateObject maintains the view model instance throughout the view lifecycle
-    @StateObject private var viewModel = UserProfileViewModel()
-    
-    // EnvironmentObject injected from parent view to access course data
+    @EnvironmentObject private var viewModel: UserProfileViewModel
     @EnvironmentObject var courseModel: CourseDataModel
     
     // Local state to control the visibility of the profile edit sheet

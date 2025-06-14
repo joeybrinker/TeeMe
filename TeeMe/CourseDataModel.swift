@@ -17,6 +17,7 @@ class CourseDataModel: ObservableObject {
     @Published var showSignIn: Bool = false
     
     private let db = Firestore.firestore()
+    private var isLoading = false // Add loading flag
     
     init() {
         loadFavoritesFromFirebase()
@@ -26,11 +27,16 @@ class CourseDataModel: ObservableObject {
     
     // Load favorites from firebase
     func loadFavoritesFromFirebase() {
+        // Prevent multiple simultaneous loads
+        guard !isLoading else { return }
         guard let userID = Auth.auth().currentUser?.uid else { return }
         
+        isLoading = true
+        
         db.collection("users").document(userID).collection("favorites").getDocuments { [weak self] snapshot, error in
-            // MARK: - CHANGE: Added weak self to prevent memory leaks
             guard let self = self else { return }
+            
+            defer { self.isLoading = false } // Reset loading flag when done
             
             if let error = error {
                 print("Error loading favorites: \(error.localizedDescription)")
@@ -39,39 +45,52 @@ class CourseDataModel: ObservableObject {
             
             guard let documents = snapshot?.documents else { return }
             
-            // Clear current favorites
-            self.favoriteCourses.removeAll()
+            // Clear current favorites on main thread
+            DispatchQueue.main.async {
+                self.favoriteCourses.removeAll()
+            }
             
-            // Process each course and its info
-            for document in documents {
-                let data = document.data()
-                
-                // MARK: - CHANGE: Only extract minimal required fields
-                guard let latitude = data["latitude"] as? Double,
-                      let longitude = data["longitude"] as? Double,
-                      let name = data["name"] as? String else { continue }
-                
-                // Create temporary placeholder MapItem
-                let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-                let placemark = MKPlacemark(coordinate: coordinate)
-                let tempMapItem = MKMapItem(placemark: placemark)
-                tempMapItem.name = name
-                
-                // MARK: - CHANGE: Immediately start async search for the real item
-                Task {
-                    if let originalItem = await self.findOriginalMapItem(
-                        withName: name,
-                        coordinate: coordinate
-                    ) {
-                        // Add the found original item to favorites
-                        await MainActor.run {
-                            self.favoriteCourses.append(originalItem)
+            // Create a task group to handle all async operations
+            Task {
+                await withTaskGroup(of: MKMapItem?.self) { group in
+                    // Add a task for each document
+                    for document in documents {
+                        group.addTask {
+                            let data = document.data()
+                            
+                            guard let latitude = data["latitude"] as? Double,
+                                  let longitude = data["longitude"] as? Double,
+                                  let name = data["name"] as? String else { return nil }
+                            
+                            let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+                            
+                            // Try to find the original item
+                            if let originalItem = await self.findOriginalMapItem(
+                                withName: name,
+                                coordinate: coordinate
+                            ) {
+                                return originalItem
+                            } else {
+                                // Fallback: Create minimal reconstructed item
+                                let placemark = MKPlacemark(coordinate: coordinate)
+                                let tempMapItem = MKMapItem(placemark: placemark)
+                                tempMapItem.name = name
+                                return tempMapItem
+                            }
                         }
-                    } else {
-                        // Fallback: Use the minimal reconstructed item if no original found
-                        await MainActor.run {
-                            self.favoriteCourses.append(tempMapItem)
+                    }
+                    
+                    // Collect all results and update on main thread
+                    var newFavorites: [MKMapItem] = []
+                    for await result in group {
+                        if let mapItem = result {
+                            newFavorites.append(mapItem)
                         }
+                    }
+                    
+                    // Update the published property on main thread
+                    await MainActor.run {
+                        self.favoriteCourses = newFavorites
                     }
                 }
             }
@@ -151,10 +170,8 @@ class CourseDataModel: ObservableObject {
                     .distance(from: CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude))
                 
                 // Match if distance is less than 50 meters and names match
-                // Using a slightly larger distance for better matches
                 print("Search Worked")
                 return distance < 50 && item.name == name
-                
             }
         } catch {
             print("Search failed: \(error.localizedDescription)")
