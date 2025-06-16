@@ -70,6 +70,7 @@ class PostViewModel: ObservableObject {
                 switch result {
                 case .success(let posts):
                     self?.posts = posts
+
                     
                 case .failure(let error):
                     self?.errorMessage = error.localizedDescription

@@ -92,6 +92,9 @@ struct AuthView: View {
                         .foregroundStyle(.red)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
+                        .allowsTightening(true)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(4)
                 }
                 
                 Spacer()
