@@ -61,17 +61,20 @@ struct FeedView: View {
                         // Loading view
                         ProgressView("Loading posts...")
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if selectedSegment == 0 {
+                    } else
+                    if selectedSegment == 0 {
                         // All posts view
                         allPostsView
+                            .navigationTitle(Text("Feed"))
                     } else {
                         // User posts view
                         UserPostsView()
                             .environmentObject(postViewModel)
+                            .navigationTitle(Text("Feed"))
                     }
                 }
             }
-            .navigationTitle(Text("Feed"))
+            
             .toolbar {
                 // Only show add post button if user is signed in
                 if Auth.auth().currentUser != nil && !userViewModel.currentUser.id.isEmpty {
@@ -79,8 +82,10 @@ struct FeedView: View {
                         Button {
                             showAddPostView = true
                         } label: {
+                            
                             Image(systemName: "plus")
                                 .foregroundStyle(.green)
+                            Text("Post")
                         }
                     }
                 }

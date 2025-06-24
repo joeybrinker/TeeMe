@@ -19,6 +19,7 @@ struct UserProfileView: View {
     
     // Local state to control the visibility of the profile edit sheet
     @State private var showingEditProfile: Bool = false
+    @State private var showFavoritesView: Bool = false
     
     // MARK: - Body
     
@@ -35,11 +36,11 @@ struct UserProfileView: View {
                 }
             }
         }
-
+        
         // Profile not set up - User is authenticated but hasn't completed profile
         else if viewModel.currentUser.id.isEmpty {
             profileNotSetupView
-                // Present the profile setup sheet when showingEditProfile is true
+            // Present the profile setup sheet when showingEditProfile is true
                 .sheet(isPresented: $showingEditProfile) {
                     ProfileSetupView()
                         .environmentObject(courseModel)
@@ -52,7 +53,7 @@ struct UserProfileView: View {
                     viewModel.loadCurrentUser()
                 }
         }
-        // Profile View - Fully authenticated and profile set up
+        //Profile View - Fully authenticated and profile set up
         else {
             NavigationStack{
                 ScrollView{
@@ -77,6 +78,11 @@ struct UserProfileView: View {
                     ProfileSetupView()
                         .environmentObject(courseModel)
                         .environmentObject(viewModel)
+                }
+                .sheet(isPresented: $showFavoritesView) {
+                    FavoritesView()
+                        .environmentObject(courseModel)
+                        .presentationDragIndicator(.visible)
                 }
                 // Enable pull-to-refresh functionality
                 .refreshable {
@@ -162,9 +168,6 @@ struct UserProfileView: View {
             // Stats summary
             profileStatsView
             
-            //Favourite Courses Preview
-            favoritesPreviewView
-            
             Spacer()
             
             // Sign out button
@@ -186,13 +189,6 @@ struct UserProfileView: View {
     /// Header section displaying user information and profile picture
     private var profileHeaderView: some View {
         VStack(spacing: 15) {
-            // Profile Icon (placeholder system image)
-            Image(systemName: "person.circle")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 120, height: 120)
-                .foregroundStyle(.gray)
-                .fontWeight(.thin)
             
             // Name and username
             VStack(spacing: 5) {
@@ -222,20 +218,26 @@ struct UserProfileView: View {
         .padding()
         .frame(maxWidth: .infinity)
         .clipShape(RoundedRectangle.init(cornerRadius: 12))
-        .shadow(radius: 1)  // Add subtle shadow for card-like appearance
+        //.shadow(radius: 1)  // Add subtle shadow for card-like appearance
     }
     
     /// Section displaying user statistics
     /// Currently only shows favorite courses count, but designed to accommodate more stats
     private var profileStatsView: some View {
         HStack(spacing: 0) {
-            statsItem(count: courseModel.favoriteCourses.count, label: "Favorites")
+            Button{
+                showFavoritesView = true
+            } label: {
+                statsItem(count: courseModel.favoriteCourses.count, label: "Favorites")
+            }
+            .buttonStyle(PlainButtonStyle())
+         
             // Additional stats items could be added here in the future
         }
         .padding(.vertical)
         .frame(maxWidth: .infinity)
         .clipShape(RoundedRectangle.init(cornerRadius: 12))
-        .shadow(radius: 1)  // Add subtle shadow for card-like appearance
+        //.shadow(radius: 1)  // Add subtle shadow for card-like appearance
     }
     
     /// Reusable function to create a stats item view
@@ -253,36 +255,6 @@ struct UserProfileView: View {
         }
         .frame(maxWidth: .infinity)  // Take up available width
     }
-    
-    /// Section showing a preview of favorite courses
-    /// Includes a header with navigation to the full favorites list
-    private var favoritesPreviewView: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            HStack {
-                Text("Favorite Courses")
-                    .font(.headline)
-                Spacer()
-                // Navigation link to Favorites View
-                NavigationLink(destination: FavoritesView()) {
-                    Text("See All")
-                        .font(.subheadline)
-                        .foregroundStyle(.green)
-                }
-            }
-            .padding()
-            
-            // Display message when no favorites exist
-            if courseModel.favoriteCourses.isEmpty {
-                Text("You haven't favorited any courses yet")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .center)
-            }
-            // If there were favorites, they would be displayed here
-        }
-    }
-    
 }
 
 /// SwiftUI Preview for this view
