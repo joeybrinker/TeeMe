@@ -1,10 +1,3 @@
-//
-//  FeedView.swift
-//  TeeMe
-//
-//  Created by Joseph Brinker on 5/27/25.
-//
-
 import SwiftUI
 import FirebaseAuth
 
@@ -19,6 +12,9 @@ struct FeedView: View {
     @State private var postToDelete: Post?
     
     @State private var showingEditProfile = false
+    
+    // Ad frequency: show ad every N posts
+    private let adFrequency = 4
     
     var body: some View {
         NavigationStack {
@@ -45,7 +41,6 @@ struct FeedView: View {
                     }
                     else if userViewModel.currentUser.id.isEmpty {
                         profileNotSetupView
-                        // Present the profile setup sheet when showingEditProfile is true
                             .sheet(isPresented: $showingEditProfile) {
                                 ProfileSetupView()
                                     .environmentObject(courseModel)
@@ -62,16 +57,18 @@ struct FeedView: View {
                         ProgressView("Loading posts...")
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else if selectedSegment == 0 {
-                        // All posts view
-                        allPostsView
+                        // All posts view with native ads
+                        allPostsWithAdsView
+                            .navigationTitle(Text("Feed"))
                     } else {
-                        // User posts view
+                        // User posts view (no ads in personal posts)
                         UserPostsView()
                             .environmentObject(postViewModel)
+                            .navigationTitle(Text("Feed"))
                     }
                 }
             }
-            .navigationTitle(Text("Feed"))
+            
             .toolbar {
                 // Only show add post button if user is signed in
                 if Auth.auth().currentUser != nil && !userViewModel.currentUser.id.isEmpty {
@@ -81,6 +78,7 @@ struct FeedView: View {
                         } label: {
                             Image(systemName: "plus")
                                 .foregroundStyle(.green)
+                            Text("Post")
                         }
                     }
                 }
@@ -98,7 +96,6 @@ struct FeedView: View {
             }
             .onChange(of: selectedSegment) { _, newValue in
                 if newValue == 1 {
-                    // Load user posts when switching to "My Posts"
                     postViewModel.loadCurrentUserPosts()
                 }
             }
@@ -126,44 +123,8 @@ struct FeedView: View {
         }
     }
     
-    // MARK: - Methods
-    
-    private func deletePost(_ post: Post) {
-        postToDelete = post
-        showDeleteConfirmation = true
-        postViewModel.deletePost(postToDelete!)
-    }
-    
-    // MARK: - Subviews
-    
-    private var notSignedInView: some View {
-        VStack{
-            ContentUnavailableView(
-                "Sign In to View Posts",
-                systemImage: "person.slash",
-                description: Text("Create an account to share your golf scores and see what others are playing.")
-            )
-            
-            Button {
-                courseModel.showSignIn = true  // Show authentication view when pressed
-            } label: {
-                ZStack{
-                    // Green rounded rectangle button
-                    RoundedRectangle(cornerRadius: 10)
-                        .frame(width: 300, height: 50)
-                        .foregroundStyle(.green)
-                        .padding()
-                    // Button text
-                    Text("Sign In")
-                        .fontWeight(.bold)
-                        .foregroundStyle(.white)
-                }
-            }
-        }
-        .padding()
-    }
-    
-    private var allPostsView: some View {
+    // MARK: - All Posts with Native Ads View
+    private var allPostsWithAdsView: some View {
         Group {
             if postViewModel.posts.isEmpty {
                 ContentUnavailableView(
@@ -174,9 +135,14 @@ struct FeedView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 16) {
-                        ForEach(postViewModel.posts, id: \.self) { post in
-                            PostView(post: post)
-                                .environmentObject(postViewModel)
+                        ForEach(Array(createFeedWithAds().enumerated()), id: \.offset) { index, item in
+                            switch item {
+                            case .post(let post):
+                                PostView(post: post)
+                                    .environmentObject(postViewModel)
+                            case .ad:
+                                NativeAdPostView()
+                            }
                         }
                     }
                     .padding(.top)
@@ -186,48 +152,46 @@ struct FeedView: View {
         }
     }
     
-    private var userPostsView: some View {
-        Group {
-            if postViewModel.userPosts.isEmpty {
-                ContentUnavailableView(
-                    "No Posts Yet",
-                    systemImage: "note.text",
-                    description: Text("Share your first golf round to get started!")
-                )
-            } else {
-                ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(postViewModel.userPosts, id: \.self) { post in
-                            PostView(post: post)
-                                .environmentObject(postViewModel)
-                        }
-                    }
-                    .padding(.top)
-                }
-                .scrollIndicators(.automatic)
-            }
-        }
-    }
-    
-    private var profileNotSetupView: some View {
-        VStack(spacing: 20) {
-            // Unavailable content placeholder with description
-            ContentUnavailableView("Complete your profile",
-                                   systemImage: "person.crop.circle.badge.plus",
-                                   description: Text("Set up your golf profile to view and post scores."))
+    // MARK: - Create Feed with Native Ads
+    private func createFeedWithAds() -> [FeedItem] {
+        var feedItems: [FeedItem] = []
+        
+        for (index, post) in postViewModel.posts.enumerated() {
+            feedItems.append(.post(post))
             
-            // Profile setup button
+            // Insert ad every adFrequency posts (but not at the very beginning)
+            if (index + 1) % adFrequency == 0 && index > 0 {
+                feedItems.append(.ad)
+            }
+        }
+        
+        return feedItems
+    }
+    
+    // MARK: - Feed Item Enum
+    private enum FeedItem {
+        case post(Post)
+        case ad
+    }
+    
+    // MARK: - Existing Subviews
+    private var notSignedInView: some View {
+        VStack{
+            ContentUnavailableView(
+                "Sign In to View Posts",
+                systemImage: "person.slash",
+                description: Text("Create an account to share your golf scores and see what others are playing.")
+            )
+            
             Button {
-                showingEditProfile = true  // Show profile setup view when pressed
+                courseModel.showSignIn = true
             } label: {
                 ZStack{
-                    // Green rounded rectangle button
                     RoundedRectangle(cornerRadius: 10)
                         .frame(width: 300, height: 50)
                         .foregroundStyle(.green)
                         .padding()
-                    // Button text
-                    Text("Set Up Profile")
+                    Text("Sign In")
                         .fontWeight(.bold)
                         .foregroundStyle(.white)
                 }
@@ -236,6 +200,28 @@ struct FeedView: View {
         .padding()
     }
     
+    private var profileNotSetupView: some View {
+        VStack(spacing: 20) {
+            ContentUnavailableView("Complete your profile",
+                                   systemImage: "person.crop.circle.badge.plus",
+                                   description: Text("Set up your golf profile to view and post scores."))
+            
+            Button {
+                showingEditProfile = true
+            } label: {
+                ZStack{
+                    RoundedRectangle(cornerRadius: 10)
+                        .frame(width: 300, height: 50)
+                        .foregroundStyle(.green)
+                        .padding()
+                    Text("Set Up Profile")
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                }
+            }
+        }
+        .padding()
+    }
 }
 
 #Preview {

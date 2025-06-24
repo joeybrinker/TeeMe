@@ -207,7 +207,7 @@ struct MapView: View {
                     .frame(width: 128, height: 48)
                     .foregroundColor(.green)
                 Text(searchIsFocused ? "Search" : "Load")
-                    .font(.headline.weight(.semibold))
+                    .font(.title3.weight(.bold))
                     .foregroundColor(.white)
             }
             .padding()
